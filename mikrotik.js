@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lucide.createIcons();
     }
 
-    const API_BASE = "http://212.95.56.131:8001";
+    const API_BASE = "https://api.ispconnect.co.ke";
 
     // --- AUTHENTICATION & UI ---
     const adminName = localStorage.getItem("adminName");

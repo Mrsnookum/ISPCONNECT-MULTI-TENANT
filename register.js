@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Point to your new Multi-Tenant VPS server using the secure HTTPS domain
-    const API_BASE = 'http://212.95.56.131:8001/api/admin';
+    const API_BASE = 'https://api.ispconnect.co.ke/api/admin';
 
     // Application State - Updated for Multi-Tenant Data
     const regData = {

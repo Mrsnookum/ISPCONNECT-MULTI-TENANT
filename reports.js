@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const companyName = localStorage.getItem("companyName");
 
     if (!adminName || !ispToken) {
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
         return;
     }
 
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("adminName");
         localStorage.removeItem("isp_token");
         localStorage.removeItem("companyName");
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
     });
 
     const sidebar = document.getElementById("sidebar");
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("adminName");
             localStorage.removeItem("isp_token");
-            window.location.href = '/register.html?view=login';
+            window.location.href = 'register.html?view=login';
             return true;
         }
         return false;
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('startDate').value = lastMonth.toISOString().split('T')[0];
 
     // --- REPORT ENGINE ---
-    const API_BASE = 'http://212.95.56.131:8001/api/admin';
+    const API_BASE = 'https://api.ispconnect.co.ke/api/admin';
     let currentChart = null;
 
     document.getElementById('generateBtn').addEventListener('click', async () => {

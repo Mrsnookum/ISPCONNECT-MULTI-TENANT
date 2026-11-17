@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ispToken = localStorage.getItem("isp_token");
     
     if (!adminName || !ispToken) {
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
         return;
     }
     
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("logoutBtn").addEventListener("click", () => {
         localStorage.removeItem("adminName"); 
         localStorage.removeItem("isp_token");
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
     });
 
     const sidebar = document.getElementById("sidebar");
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("adminName");
             localStorage.removeItem("isp_token");
-            window.location.href = '/register.html?view=login';
+            window.location.href = 'register.html?view=login';
             return true;
         }
         return false;
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- API LOGIC ---
     // Pointing to your local backend
-    const API_BASE = 'http://212.95.56.131:8001/api/admin/settings';
+    const API_BASE = 'https://api.ispconnect.co.ke/api/admin/settings';
 
     async function loadSettings() {
         try {

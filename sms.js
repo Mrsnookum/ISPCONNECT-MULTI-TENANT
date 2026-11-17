@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lucide.createIcons();
     }
     
-    const API_BASE = 'http://212.95.56.131:8001/api/admin/sms';
+    const API_BASE = 'https://api.ispconnect.co.ke/api/admin/sms';
 
     // --- AUTHENTICATION & BRANDING ---
     const adminName = localStorage.getItem("adminName");
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const companyName = localStorage.getItem("companyName");
 
     if (!adminName || !ispToken) {
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
         return;
     }
 
@@ -53,14 +53,14 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("adminName");
         localStorage.removeItem("isp_token");
         localStorage.removeItem("companyName");
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
     });
 
     function checkAuthError(res) {
         if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("adminName");
             localStorage.removeItem("isp_token");
-            window.location.href = '/register.html?view=login';
+            window.location.href = 'register.html?view=login';
             return true;
         }
         return false;

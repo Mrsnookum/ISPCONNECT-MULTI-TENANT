@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Block access if the JWT token is missing
     if (!adminName || !ispToken) {
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
         return;
     }
     
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("adminName");
         localStorage.removeItem("isp_token");
         localStorage.removeItem("companyName");
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
     });
 
     const sidebar = document.getElementById("sidebar");
@@ -76,14 +76,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("adminName");
             localStorage.removeItem("isp_token");
-            window.location.href = '/register.html?view=login';
+            window.location.href = 'register.html?view=login';
             return true;
         }
         return false;
     }
 
     // --- 3. PAYMENTS LEDGER LOGIC ---
-    const API_BASE = 'http://212.95.56.131:8001/api/admin';
+    const API_BASE = 'https://api.ispconnect.co.ke/api/admin';
     let allPayments = [];
     let currentFilter = 'all';
 

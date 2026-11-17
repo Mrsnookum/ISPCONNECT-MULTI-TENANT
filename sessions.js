@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- SESSIONS DATA ENGINE ---
-    const API_BASE = 'http://212.95.56.131:8001/api/admin';
+    const API_BASE = 'https://api.ispconnect.co.ke/api/admin';
     let allSessions = [];
     let currentFilter = 'active';
 

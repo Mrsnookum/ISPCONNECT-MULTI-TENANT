@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // This will eventually be https://api.ispconnect.co.ke/api/portal
-    const API_BASE = 'http://212.95.56.131:8001/api/portal';
+    const API_BASE = 'https://api.ispconnect.co.ke/api/portal';
     let selectedPackageId = null;
 
     // --- MULTI-TENANT ROUTING: Grab the specific ISP identifier ---

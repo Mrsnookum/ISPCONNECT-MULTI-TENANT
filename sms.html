@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS & Notifications | ISPConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00B37E; --primary-light: #E6F7F2;
+            --blue: #007BFF; --blue-light: #E6F2FF;
+            --text-dark: #1E293B; --text-muted: #64748B;
+            --bg: #F8FAFC; --card-bg: #FFFFFF;
+            --sidebar-width: 260px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR & HEADER (Unified Theme) */
+        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid #E2E8F0; display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; }
+        .logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 32px; padding: 0 8px; }
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        .nav-item:hover { background: #F8FAFC; color: var(--text-dark); }
+        .nav-item.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+        
+        .upgrade-card { background: linear-gradient(180deg, #022C22 0%, #064E3B 100%); border-radius: 12px; padding: 20px; color: #fff; margin-top: auto; position: relative; overflow: hidden; }
+        .upgrade-card::before { content: ''; position: absolute; top: -20px; left: -20px; right: -20px; height: 80px; background: radial-gradient(circle, rgba(0,179,126,0.3) 0%, transparent 70%); }
+        .upgrade-card h4, .upgrade-card p, .btn-upgrade { position: relative; z-index: 2; }
+        .upgrade-card h4 { font-size: 0.95rem; margin: 12px 0 6px; font-weight: 600; }
+        .upgrade-card p { font-size: 0.75rem; color: #A7F3D0; margin-bottom: 16px; line-height: 1.4; }
+        .btn-upgrade { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: space-between; align-items: center; }
+
+        .mobile-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 40; display: none; backdrop-filter: blur(2px); }
+        .mobile-overlay.active { display: block; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+        
+        .header { background: var(--bg); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; }
+        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); }
+        .header-profile { display: flex; align-items: center; gap: 24px; margin-left: auto; }
+        
+        .profile-dropdown-container { position: relative; display: inline-block; }
+        .profile-btn { display: flex; align-items: center; gap: 12px; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 8px; transition: background 0.2s; }
+        .profile-btn:hover { background: #E2E8F0; }
+        .avatar { width: 36px; height: 36px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0; }
+        .profile-info { text-align: left; }
+        .profile-name { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); }
+        .profile-role { font-size: 0.7rem; color: var(--text-muted); }
+        .profile-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; width: 220px; background: var(--card-bg); border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: var(--shadow-md); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 100; padding: 8px 0; }
+        .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; width: 100%; border: none; background: transparent; color: var(--text-dark); font-size: 0.85rem; font-weight: 500; cursor: pointer; text-align: left; transition: background 0.2s; }
+        .dropdown-item:hover { background: #F8FAFC; }
+        
+        /* DASHBOARD & FORMS */
+        .dashboard-container { padding: 32px; display: flex; flex-direction: column; gap: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .page-header p { color: var(--text-muted); font-size: 0.85rem; }
+
+        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); padding: 24px; }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .form-group input { padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 0.85rem; outline: none; transition: border 0.2s; }
+        .form-group input:focus { border-color: var(--blue); }
+        
+        .btn-primary { background: var(--blue); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* WALLET UI */
+        .wallet-display { display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+        .wallet-currency { font-size: 1.25rem; font-weight: 600; color: var(--text-muted); }
+        .wallet-amount { font-size: 2.5rem; font-weight: 700; color: var(--text-dark); }
+        
+        .topup-container { display: flex; gap: 12px; align-items: flex-end; max-width: 400px; margin-top: 24px; }
+        .topup-container .form-group { flex: 1; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); padding: 12px; border-bottom: 1px solid #F1F5F9; text-transform: uppercase; }
+        td { padding: 14px 12px; font-size: 0.85rem; color: var(--text-dark); border-bottom: 1px solid #F8FAFC; vertical-align: top; }
+        .table-responsive { overflow-x: auto; width: 100%; }
+        
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .status-sent { background: var(--primary-light); color: var(--primary); }
+        .status-failed { background: #FEF2F2; color: #EF4444; }
+
+        /* TOAST */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 9999; }
+        .toast { background: #1E293B; color: #fff; padding: 16px 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: 500; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; }
+            .sidebar.open { left: 0; }
+            .mobile-toggle { display: block; }
+            .dashboard-container { padding: 16px; }
+            .topup-container { flex-direction: column; align-items: stretch; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo"><i data-lucide="wifi" stroke-width="3"></i> <span id="sidebar-logo-text">ISPConnect</span></div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i data-lucide="home" width="18"></i> Dashboard</a>
+            <a href="mikrotik.html" class="nav-item"><i data-lucide="hard-drive" width="18"></i> MikroTik</a>
+            <a href="customers.html" class="nav-item"><i data-lucide="users" width="18"></i> Customers</a>
+            <a href="packages.html" class="nav-item"><i data-lucide="package" width="18"></i> Packages</a>
+            <a href="payments.html" class="nav-item"><i data-lucide="file-text" width="18"></i> Payments</a>
+            <a href="subscriptions.html" class="nav-item"><i data-lucide="refresh-cw" width="18"></i> Subscriptions</a>
+            <a href="sessions.html" class="nav-item"><i data-lucide="monitor-play" width="18"></i> Sessions</a>
+            <a href="reports.html" class="nav-item"><i data-lucide="bar-chart-2" width="18"></i> Reports</a>
+            <a href="sms.html" class="nav-item active"><i data-lucide="message-square" width="18"></i> SMS</a>
+            <a href="settings.html" class="nav-item"><i data-lucide="settings" width="18"></i> Settings</a>
+        </nav>
+        <div class="upgrade-card">
+            <i data-lucide="wifi" style="color: var(--primary); margin-bottom: 4px;"></i>
+            <h4>Fast. Reliable.<br>Connected.</h4>
+            <p>Powering your internet business with smart billing solutions.</p>
+            <button class="btn-upgrade">Upgrade Plan <i data-lucide="arrow-right" width="14"></i></button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <button class="mobile-toggle" id="mobileToggle"><i data-lucide="menu"></i></button>
+            <div class="header-profile">
+                <div class="profile-dropdown-container">
+                    <button class="profile-btn" id="profileToggleBtn">
+                        <div class="avatar" id="navAvatar">--</div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="navName">Loading...</div>
+                            <div class="profile-role" id="navCompany">Administrator</div>
+                        </div>
+                        <i data-lucide="chevron-down" width="16" color="#94A3B8"></i>
+                    </button>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="dropdown-item" id="logoutBtn"><i data-lucide="log-out" width="16"></i> Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <div class="page-header">
+                <h1>SMS & Wallet.</h1>
+                <p>Top up your wallet to enable automated voucher deliveries and outage alerts.</p>
+            </div>
+
+            <!-- WALLET CARD (Replaced the API Gateway config) -->
+            <div class="card">
+                <h2 class="card-title"><i data-lucide="wallet" width="20"></i> Wallet Balance</h2>
+                
+                <div class="wallet-display">
+                    <span class="wallet-currency">KES</span>
+                    <span class="wallet-amount" id="walletBalanceDisplay">0.00</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Sufficient balance ensures your customers receive their Wi-Fi vouchers instantly.</p>
+
+                <form id="formTopUp" class="topup-container">
+                    <div class="form-group">
+                        <label>Top-Up Amount (KES)</label>
+                        <input type="number" id="topUpAmount" placeholder="e.g. 500" min="50" required>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btnTopUp"><i data-lucide="credit-card" width="16"></i> Top Up via M-Pesa</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i data-lucide="list" width="20"></i> Automated Delivery Ledger</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Recipient Phone</th>
+                                <th>Message Payload</th>
+                                <th>Cost</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="smsLedgerBody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading ledger...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="sms.js"></script>
+</body>
+</html>

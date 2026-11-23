@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS & Notifications | ISPConnect</title>
+    <title>SMS & Wallet | ISPConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --primary: #00B37E; --primary-light: #E6F7F2;
             --blue: #007BFF; --blue-light: #E6F2FF;
+            --purple: #7C3AED; --purple-light: #F3E8FF;
+            --amber: #D97706; --amber-light: #FEF3C7;
             --text-dark: #1E293B; --text-muted: #64748B;
-            --bg: #F8FAFC; --card-bg: #FFFFFF;
+            --bg: #F8FAFC; --card-bg: #FFFFFF; --border: #E2E8F0;
             --sidebar-width: 260px;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-sm: 0 1px 3px rgba(15,23,42,0.04);
+            --shadow-md: 0 4px 12px rgba(15,23,42,0.06);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR & HEADER (Unified Theme) */
-        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid #E2E8F0; display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; }
+        /* SIDEBAR & HEADER */
+        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; flex-shrink: 0; }
         .logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 32px; padding: 0 8px; }
         .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
         .nav-item:hover { background: #F8FAFC; color: var(--text-dark); }
         .nav-item.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
-        
+
         .upgrade-card { background: linear-gradient(180deg, #022C22 0%, #064E3B 100%); border-radius: 12px; padding: 20px; color: #fff; margin-top: auto; position: relative; overflow: hidden; }
         .upgrade-card::before { content: ''; position: absolute; top: -20px; left: -20px; right: -20px; height: 80px; background: radial-gradient(circle, rgba(0,179,126,0.3) 0%, transparent 70%); }
         .upgrade-card h4, .upgrade-card p, .btn-upgrade { position: relative; z-index: 2; }
@@ -37,70 +39,117 @@
 
         .mobile-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 40; display: none; backdrop-filter: blur(2px); }
         .mobile-overlay.active { display: block; }
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
-        
-        .header { background: var(--bg); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; }
-        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); }
-        .header-profile { display: flex; align-items: center; gap: 24px; margin-left: auto; }
-        
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; position: relative; }
+
+        .header { background: var(--bg); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; border-bottom: 1px solid rgba(226,232,240,0.6); }
+        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); padding: 4px; }
+        .header-profile { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+
         .profile-dropdown-container { position: relative; display: inline-block; }
-        .profile-btn { display: flex; align-items: center; gap: 12px; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 8px; transition: background 0.2s; }
+        .profile-btn { display: flex; align-items: center; gap: 10px; background: transparent; border: none; cursor: pointer; padding: 4px 6px; border-radius: 8px; transition: background 0.2s; }
         .profile-btn:hover { background: #E2E8F0; }
-        .avatar { width: 36px; height: 36px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0; }
+        .avatar { width: 34px; height: 34px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem; flex-shrink: 0; }
         .profile-info { text-align: left; }
         .profile-name { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); }
         .profile-role { font-size: 0.7rem; color: var(--text-muted); }
-        .profile-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; width: 220px; background: var(--card-bg); border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: var(--shadow-md); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 100; padding: 8px 0; }
+        .profile-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; width: 200px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-md); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 100; padding: 6px 0; }
         .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
-        .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; width: 100%; border: none; background: transparent; color: var(--text-dark); font-size: 0.85rem; font-weight: 500; cursor: pointer; text-align: left; transition: background 0.2s; }
+        .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; width: 100%; border: none; background: transparent; color: var(--text-dark); font-size: 0.85rem; font-weight: 500; cursor: pointer; text-align: left; }
         .dropdown-item:hover { background: #F8FAFC; }
-        
-        /* DASHBOARD & FORMS */
-        .dashboard-container { padding: 32px; display: flex; flex-direction: column; gap: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* CONTAINER */
+        .dashboard-container { padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .page-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+        .page-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); margin-bottom: 4px; }
         .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
         .page-header p { color: var(--text-muted); font-size: 0.85rem; }
+        .btn-refresh { background: var(--blue); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+        .btn-refresh:hover { opacity: 0.92; }
 
-        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); padding: 24px; }
-        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px; }
+        /* 2x2 KPI GRID (4 cols desktop, 2x2 mobile) */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 12px; min-width: 0; }
+        .kpi-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .kpi-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .kpi-icon.green { background: var(--primary-light); color: var(--primary); }
+        .kpi-icon.blue { background: var(--blue-light); color: var(--blue); }
+        .kpi-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .kpi-icon.amber { background: var(--amber-light); color: var(--amber); }
+        .kpi-tag { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+        .kpi-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+        .kpi-value { font-size: 1.35rem; font-weight: 700; color: var(--text-dark); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kpi-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
 
-        .form-group { display: flex; flex-direction: column; gap: 8px; }
-        .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-        .form-group input { padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 0.85rem; outline: none; transition: border 0.2s; }
+        /* CARDS & TOP-UP */
+        .card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap; }
+        .card-title { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-dark); }
+        .card-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+        .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .preset-chip { background: #F1F5F9; border: 1px solid var(--border); color: var(--text-dark); padding: 7px 14px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .preset-chip:hover, .preset-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+        .topup-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .form-group label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+        .form-group input { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; transition: border 0.2s; background: var(--card-bg); color: var(--text-dark); }
         .form-group input:focus { border-color: var(--blue); }
-        
-        .btn-primary { background: var(--blue); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+
+        .conversion-banner { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--primary-light); color: #065F46; font-size: 0.82rem; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .conversion-banner strong { font-weight: 700; font-size: 0.92rem; }
+
+        .btn-primary { background: var(--blue); color: #fff; border: none; padding: 12px 22px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; white-space: nowrap; height: 43px; }
         .btn-primary:hover { background: #0056b3; }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
 
-        /* WALLET UI */
-        .wallet-display { display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px; }
-        .wallet-currency { font-size: 1.25rem; font-weight: 600; color: var(--text-muted); }
-        .wallet-amount { font-size: 2.5rem; font-weight: 700; color: var(--text-dark); }
-        
-        .topup-container { display: flex; gap: 12px; align-items: flex-end; max-width: 400px; margin-top: 24px; }
-        .topup-container .form-group { flex: 1; }
+        /* TABLE & MOBILE CARDS */
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid #F1F5F9; text-transform: uppercase; letter-spacing: 0.04em; }
+        td { padding: 13px 12px; font-size: 0.84rem; color: var(--text-dark); border-bottom: 1px solid #F8FAFC; vertical-align: middle; }
+        .msg-cell { max-width: 340px; color: var(--text-muted); line-height: 1.4; word-break: break-word; }
 
-        /* TABLE */
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); padding: 12px; border-bottom: 1px solid #F1F5F9; text-transform: uppercase; }
-        td { padding: 14px 12px; font-size: 0.85rem; color: var(--text-dark); border-bottom: 1px solid #F8FAFC; vertical-align: top; }
-        .table-responsive { overflow-x: auto; width: 100%; }
-        
-        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
         .status-sent { background: var(--primary-light); color: var(--primary); }
         .status-failed { background: #FEF2F2; color: #EF4444; }
 
-        /* TOAST */
-        .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 9999; }
-        .toast { background: #1E293B; color: #fff; padding: 16px 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: 500; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; }
+        /* TOAST & ANIMATION */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; left: auto; display: flex; flex-direction: column; gap: 10px; z-index: 9999; max-width: 360px; }
+        .toast { background: #1E293B; color: #fff; padding: 14px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; font-weight: 500; opacity: 0; transform: translateY(16px); transition: all 0.3s ease; box-shadow: var(--shadow-md); }
         .toast.show { opacity: 1; transform: translateY(0); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .topup-grid { grid-template-columns: 1fr 1fr; }
+            .topup-grid .btn-primary { grid-column: 1 / -1; width: 100%; }
+        }
 
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; }
             .sidebar.open { left: 0; }
             .mobile-toggle { display: block; }
-            .dashboard-container { padding: 16px; }
-            .topup-container { flex-direction: column; align-items: stretch; max-width: 100%; }
+            .header { padding: 12px 16px; }
+            .dashboard-container { padding: 16px 14px 32px; gap: 16px; }
+            .page-header h1 { font-size: 1.3rem; }
+            .kpi-grid { gap: 10px; }
+            .kpi-card { padding: 14px 12px; gap: 10px; }
+            .kpi-value { font-size: 1.15rem; }
+            .card { padding: 16px; }
+            .topup-grid { grid-template-columns: 1fr; }
+            .toast-container { left: 14px; right: 14px; bottom: 14px; max-width: none; }
+
+            /* Convert Ledger Table into clean mobile cards */
+            table, thead, tbody, th, td, tr { display: block; width: 100%; }
+            thead { display: none; }
+            tbody tr { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--card-bg); }
+            tbody td { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 6px 0; border-bottom: 1px solid #F1F5F9; font-size: 0.82rem; }
+            tbody td:last-child { border-bottom: none; padding-bottom: 0; }
+            tbody td::before { content: attr(data-label); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); flex-shrink: 0; }
+            .msg-cell { max-width: none; text-align: right; }
         }
     </style>
 </head>
@@ -150,45 +199,124 @@
         </header>
 
         <div class="dashboard-container">
-            <div class="page-header">
-                <h1>SMS & Wallet.</h1>
-                <p>Top up your wallet to enable automated voucher deliveries and outage alerts.</p>
+            <div class="page-top">
+                <div class="page-header">
+                    <div class="page-eyebrow">SMS & Messaging</div>
+                    <h1>SMS Wallet Overview</h1>
+                    <p>Top up credits to deliver instant Wi-Fi vouchers and router outage alerts.</p>
+                </div>
+                <button class="btn-refresh" id="btnRefreshAll"><i data-lucide="refresh-cw" width="15"></i> Refresh</button>
             </div>
 
-            <!-- WALLET CARD (Replaced the API Gateway config) -->
-            <div class="card">
-                <h2 class="card-title"><i data-lucide="wallet" width="20"></i> Wallet Balance</h2>
-                
-                <div class="wallet-display">
-                    <span class="wallet-currency">KES</span>
-                    <span class="wallet-amount" id="walletBalanceDisplay">0.00</span>
+            <!-- 2x2 RESPONSIVE KPI GRID -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon green"><i data-lucide="wallet" width="18"></i></div>
+                        <span class="kpi-tag">Balance</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Wallet Balance</div>
+                        <div class="kpi-value" id="walletBalanceDisplay">KES 0.00</div>
+                        <div class="kpi-sub">Prepaid SMS funds</div>
+                    </div>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Sufficient balance ensures your customers receive their Wi-Fi vouchers instantly.</p>
 
-                <form id="formTopUp" class="topup-container">
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon blue"><i data-lucide="message-square" width="18"></i></div>
+                        <span class="kpi-tag">Credits</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">SMS Units Left</div>
+                        <div class="kpi-value" id="smsUnitsDisplay">0</div>
+                        <div class="kpi-sub">Ready to dispatch</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon purple"><i data-lucide="tag" width="18"></i></div>
+                        <span class="kpi-tag">Tariff</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Rate per SMS</div>
+                        <div class="kpi-value" id="smsRateDisplay">KES 0.80</div>
+                        <div class="kpi-sub">Sender: TALK-SASA</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon amber"><i data-lucide="send" width="18"></i></div>
+                        <span class="kpi-tag">Delivered</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Messages Sent</div>
+                        <div class="kpi-value" id="sentCountDisplay">0</div>
+                        <div class="kpi-sub" id="failedCountDisplay">0 failed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOP-UP CARD WITH LIVE CONVERSION -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title"><i data-lucide="smartphone" width="18"></i> Top Up SMS Wallet</h2>
+                        <div class="card-subtitle">Instant M-Pesa STK Push. Credits are added automatically once paid.</div>
+                    </div>
+                </div>
+
+                <div class="preset-row" id="presetRow">
+                    <button type="button" class="preset-chip" data-amount="50">KES 50</button>
+                    <button type="button" class="preset-chip" data-amount="100">KES 100</button>
+                    <button type="button" class="preset-chip" data-amount="250">KES 250</button>
+                    <button type="button" class="preset-chip active" data-amount="500">KES 500</button>
+                    <button type="button" class="preset-chip" data-amount="1000">KES 1,000</button>
+                </div>
+
+                <form id="formTopUp" class="topup-grid">
                     <div class="form-group">
                         <label>Top-Up Amount (KES)</label>
-                        <input type="number" id="topUpAmount" placeholder="e.g. 500" min="50" required>
+                        <input type="number" id="topUpAmount" value="500" placeholder="Min. 50" min="50" step="1" required>
                     </div>
-                    <button type="submit" class="btn-primary" id="btnTopUp"><i data-lucide="credit-card" width="16"></i> Top Up via M-Pesa</button>
+                    <div class="form-group">
+                        <label>M-Pesa Phone (Optional)</label>
+                        <input type="tel" id="topUpPhone" placeholder="e.g. 0712345678 (uses default if blank)">
+                    </div>
+                    <button type="submit" class="btn-primary" id="btnTopUp">
+                        <i data-lucide="credit-card" width="16"></i> Top Up via M-Pesa
+                    </button>
                 </form>
+
+                <div class="conversion-banner">
+                    <span>You will receive: <strong id="conversionUnits">625 SMS units</strong></span>
+                    <span id="conversionRateText">Calculated at KES 0.80 / SMS</span>
+                </div>
             </div>
 
+            <!-- AUTOMATED DELIVERY LEDGER -->
             <div class="card">
-                <h2 class="card-title"><i data-lucide="list" width="20"></i> Automated Delivery Ledger</h2>
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title"><i data-lucide="list" width="18"></i> Automated Delivery Ledger</h2>
+                        <div class="card-subtitle">Real-time log of Wi-Fi vouchers and router outage alerts.</div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
                                 <th>Timestamp</th>
-                                <th>Recipient Phone</th>
-                                <th>Message Payload</th>
+                                <th>Recipient</th>
+                                <th>Message</th>
                                 <th>Cost</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="smsLedgerBody">
-                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading ledger...</td></tr>
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading ledger...</td></tr>
                         </tbody>
                     </table>
                 </div>

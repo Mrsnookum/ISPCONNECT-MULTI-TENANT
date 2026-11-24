@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payments | ISPConnect</title>
+    <title>Payments & Wallet | ISPConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* --- GLOBAL DASHBOARD STYLES --- */
         :root {
             --primary: #00B37E; --primary-light: #E6F7F2;
             --blue: #007BFF; --blue-light: #E6F2FF;
-            --purple: #8B5CF6; --purple-light: #F3E8FF;
+            --purple: #7C3AED; --purple-light: #F3E8FF;
+            --amber: #D97706; --amber-light: #FEF3C7;
+            --red: #EF4444; --red-light: #FEE2E2;
             --text-dark: #1E293B; --text-muted: #64748B;
-            --bg: #F8FAFC; --card-bg: #FFFFFF;
+            --bg: #F8FAFC; --card-bg: #FFFFFF; --border: #E2E8F0;
             --sidebar-width: 260px;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-sm: 0 1px 3px rgba(15,23,42,0.04);
+            --shadow-md: 0 4px 12px rgba(15,23,42,0.06);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR */
-        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid #E2E8F0; display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; }
+        /* SIDEBAR & HEADER */
+        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; flex-shrink: 0; }
         .logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 32px; padding: 0 8px; }
         .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
         .nav-item:hover { background: #F8FAFC; color: var(--text-dark); }
         .nav-item.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
-        
+
         .upgrade-card { background: linear-gradient(180deg, #022C22 0%, #064E3B 100%); border-radius: 12px; padding: 20px; color: #fff; margin-top: auto; position: relative; overflow: hidden; }
         .upgrade-card::before { content: ''; position: absolute; top: -20px; left: -20px; right: -20px; height: 80px; background: radial-gradient(circle, rgba(0,179,126,0.3) 0%, transparent 70%); }
         .upgrade-card h4, .upgrade-card p, .btn-upgrade { position: relative; z-index: 2; }
@@ -39,105 +40,147 @@
 
         .mobile-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 40; display: none; backdrop-filter: blur(2px); }
         .mobile-overlay.active { display: block; }
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
-        
-        /* HEADER */
-        .header { background: var(--bg); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; }
-        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); }
-        .search-container { display: flex; align-items: center; gap: 8px; background: var(--card-bg); padding: 10px 16px; border-radius: 8px; width: 100%; max-width: 350px; border: 1px solid #E2E8F0; }
-        .search-container input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.85rem; color: var(--text-dark); }
-        
-        .header-profile { display: flex; align-items: center; gap: 24px; }
-        .notification { position: relative; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; }
-        .notification-dot { position: absolute; top: 0px; right: 2px; width: 8px; height: 8px; background: #EF4444; border-radius: 50%; border: 2px solid var(--bg); }
-        
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; position: relative; }
+
+        .header { background: var(--bg); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; border-bottom: 1px solid rgba(226,232,240,0.6); }
+        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); padding: 4px; }
+        .header-profile { display: flex; align-items: center; gap: 16px; margin-left: auto; }
         .profile-dropdown-container { position: relative; display: inline-block; }
-        .profile-btn { display: flex; align-items: center; gap: 12px; background: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 8px; transition: background 0.2s; }
+        .profile-btn { display: flex; align-items: center; gap: 10px; background: transparent; border: none; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
         .profile-btn:hover { background: #E2E8F0; }
-        .avatar { width: 36px; height: 36px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0; }
+        .avatar { width: 34px; height: 34px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem; flex-shrink: 0; }
         .profile-info { text-align: left; }
         .profile-name { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); }
         .profile-role { font-size: 0.7rem; color: var(--text-muted); }
-        
-        .profile-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; width: 220px; background: var(--card-bg); border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: var(--shadow-md); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 100; padding: 8px 0; }
+        .profile-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; width: 200px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-md); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 100; padding: 6px 0; }
         .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
-        .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; width: 100%; border: none; background: transparent; color: var(--text-dark); font-size: 0.85rem; font-weight: 500; cursor: pointer; text-align: left; transition: background 0.2s; }
+        .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; width: 100%; border: none; background: transparent; color: var(--text-dark); font-size: 0.85rem; font-weight: 500; cursor: pointer; text-align: left; }
         .dropdown-item:hover { background: #F8FAFC; }
-        .dropdown-item.text-red { color: #EF4444; }
-        .dropdown-item.text-red:hover { background: #FEF2F2; }
-        .dropdown-divider { height: 1px; background: #E2E8F0; margin: 4px 0; }
+        .dropdown-item.text-red { color: var(--red); }
 
-        .dashboard-container { padding: 0 32px 32px; display: flex; flex-direction: column; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); overflow: hidden; }
-
-        /* --- PAYMENTS SPECIFIC STYLES --- */
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        /* CONTAINER */
+        .dashboard-container { padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 20px; max-width: 1250px; margin: 0 auto; width: 100%; }
+        .page-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+        .page-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); margin-bottom: 4px; }
         .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
         .page-header p { color: var(--text-muted); font-size: 0.85rem; }
-        
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px; }
-        .kpi-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; text-transform: uppercase; }
-        .kpi-val { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); }
+        .btn-refresh { background: var(--blue); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 
-        .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0; }
-        .filter-tabs { display: flex; gap: 8px; }
-        .filter-btn { padding: 6px 12px; border-radius: 99px; border: 1px solid #E2E8F0; background: transparent; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        /* 2x2 KPI GRID */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 12px; min-width: 0; }
+        .kpi-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .kpi-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .kpi-icon.green { background: var(--primary-light); color: var(--primary); }
+        .kpi-icon.blue { background: var(--blue-light); color: var(--blue); }
+        .kpi-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .kpi-icon.amber { background: var(--amber-light); color: var(--amber); }
+        .kpi-tag { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+        .kpi-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+        .kpi-value { font-size: 1.35rem; font-weight: 700; color: var(--text-dark); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kpi-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* CARDS & FORMS */
+        .card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap; }
+        .card-title { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-dark); }
+        .card-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+        .warning-banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 10px; background: var(--amber-light); color: #92400E; font-size: 0.8rem; font-weight: 500; line-height: 1.4; margin-bottom: 16px; border: 1px solid #FDE68A; }
+        .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .preset-chip { background: #F1F5F9; border: 1px solid var(--border); color: var(--text-dark); padding: 7px 14px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .preset-chip:hover, .preset-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+        .topup-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .form-group label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+        .form-group input { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: var(--card-bg); color: var(--text-dark); }
+        .form-group input:focus { border-color: var(--blue); }
+
+        .btn-primary { background: var(--blue); color: #fff; border: none; padding: 12px 22px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; height: 43px; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
+        .btn-green { background: var(--primary); }
+        .btn-green:hover { background: #00996B; }
+
+        /* TOOLBAR & TABLE */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .filter-btn { padding: 6px 12px; border-radius: 99px; border: 1px solid var(--border); background: transparent; font-size: 0.76rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
         .filter-btn.active { background: var(--text-dark); color: #fff; border-color: var(--text-dark); }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { text-align: left; font-size: 0.75rem; font-weight: 500; color: var(--text-muted); padding: 12px 20px; border-bottom: 1px solid #F1F5F9; white-space: nowrap; }
-        td { padding: 14px 20px; font-size: 0.85rem; color: var(--text-dark); border-bottom: 1px solid #F8FAFC; vertical-align: middle; white-space: nowrap; }
-        .table-responsive { overflow-x: auto; width: 100%; }
-        
-        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; }
-        .status-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
-        .status-success { background: var(--primary-light); color: var(--primary); }
-        .status-success .dot { background: var(--primary); }
-        .status-pending { background: #FEF3C7; color: #D97706; }
-        .status-pending .dot { background: #D97706; }
-        .status-failed { background: #FEE2E2; color: #EF4444; }
-        .status-failed .dot { background: #EF4444; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: #F8FAFC; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); width: 100%; max-width: 280px; }
+        .search-box input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.82rem; color: var(--text-dark); }
 
-        .code-pill { background: #F1F5F9; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: 600; color: var(--text-dark); font-size: 0.8rem; letter-spacing: 0.5px; border: 1px solid #E2E8F0; }
-        
-        .action-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 4px; transition: all 0.2s; }
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid #F1F5F9; text-transform: uppercase; }
+        td { padding: 13px 12px; font-size: 0.84rem; color: var(--text-dark); border-bottom: 1px solid #F8FAFC; vertical-align: middle; }
+        .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .status-success { background: var(--primary-light); color: var(--primary); }
+        .status-pending { background: var(--amber-light); color: var(--amber); }
+        .status-failed { background: var(--red-light); color: var(--red); }
+        .code-pill { background: #F1F5F9; padding: 3px 8px; border-radius: 6px; font-family: monospace; font-weight: 600; font-size: 0.78rem; border: 1px solid var(--border); }
+        .action-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; }
         .action-btn:hover { background: #F1F5F9; color: var(--blue); }
 
-        /* TOAST NOTIFICATION */
-        .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 9999; }
-        .toast { background: #1E293B; color: #fff; padding: 16px 20px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: 500; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* NON-DISMISSIBLE SUBSCRIPTION PAYWALL MODAL */
+        .paywall-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.75); backdrop-filter: blur(5px); z-index: 9990; display: none; align-items: center; justify-content: center; padding: 16px; }
+        .paywall-backdrop.active { display: flex; }
+        .paywall-modal { background: var(--card-bg); border-radius: 16px; max-width: 440px; width: 100%; padding: 28px 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center; }
+        .paywall-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .paywall-modal h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+        .paywall-modal p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+        .paywall-modal .form-group { text-align: left; margin-bottom: 16px; }
+
+        /* TOAST & SPIN */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; max-width: 360px; }
+        .toast { background: #1E293B; color: #fff; padding: 14px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; font-weight: 500; opacity: 0; transform: translateY(16px); transition: all 0.3s ease; }
         .toast.show { opacity: 1; transform: translateY(0); }
-        .toast.error { border-left: 4px solid #EF4444; }
+        .toast.error { border-left: 4px solid var(--red); }
         .toast.success { border-left: 4px solid var(--primary); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .topup-grid { grid-template-columns: 1fr 1fr; }
+            .topup-grid .btn-primary { grid-column: 1 / -1; width: 100%; }
+        }
 
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; }
             .sidebar.open { left: 0; }
-            .header { padding: 16px; }
             .mobile-toggle { display: block; }
-            .dashboard-container { padding: 0 16px 16px; }
-            .profile-info { display: none; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; }
-            .search-container { display: none; }
+            .header { padding: 12px 16px; }
+            .dashboard-container { padding: 16px 14px 32px; gap: 16px; }
+            .page-header h1 { font-size: 1.3rem; }
+            .kpi-grid { gap: 10px; }
+            .kpi-card { padding: 14px 12px; gap: 10px; }
+            .kpi-value { font-size: 1.15rem; }
+            .card { padding: 16px; }
+            .topup-grid { grid-template-columns: 1fr; }
+            .search-box { max-width: none; }
+            .toast-container { left: 14px; right: 14px; bottom: 14px; max-width: none; }
+
+            table, thead, tbody, th, td, tr { display: block; width: 100%; }
+            thead { display: none; }
+            tbody tr { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--card-bg); }
+            tbody td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid #F1F5F9; font-size: 0.82rem; }
+            tbody td:last-child { border-bottom: none; padding-bottom: 0; }
+            tbody td::before { content: attr(data-label); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); flex-shrink: 0; }
         }
     </style>
 </head>
 <body>
-
-    <!-- MOBILE OVERLAY -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
-        <div class="logo">
-            <i data-lucide="wifi" stroke-width="3"></i> <span id="sidebar-logo-text">ISPConnect</span>
-        </div>
+        <div class="logo"><i data-lucide="wifi" stroke-width="3"></i> <span id="sidebar-logo-text">ISPConnect</span></div>
         <nav class="nav-menu">
             <a href="dashboard.html" class="nav-item"><i data-lucide="home" width="18"></i> Dashboard</a>
             <a href="mikrotik.html" class="nav-item"><i data-lucide="hard-drive" width="18"></i> MikroTik</a>
             <a href="customers.html" class="nav-item"><i data-lucide="users" width="18"></i> Customers</a>
             <a href="packages.html" class="nav-item"><i data-lucide="package" width="18"></i> Packages</a>
-            <!-- Payments is Active here -->
             <a href="payments.html" class="nav-item active"><i data-lucide="file-text" width="18"></i> Payments</a>
             <a href="subscriptions.html" class="nav-item"><i data-lucide="refresh-cw" width="18"></i> Subscriptions</a>
             <a href="sessions.html" class="nav-item"><i data-lucide="monitor-play" width="18"></i> Sessions</a>
@@ -145,35 +188,18 @@
             <a href="sms.html" class="nav-item"><i data-lucide="message-square" width="18"></i> SMS</a>
             <a href="settings.html" class="nav-item"><i data-lucide="settings" width="18"></i> Settings</a>
         </nav>
-
         <div class="upgrade-card">
             <i data-lucide="wifi" style="color: var(--primary); margin-bottom: 4px;"></i>
             <h4>Fast. Reliable.<br>Connected.</h4>
             <p>Powering your internet business with smart billing solutions.</p>
-            <button class="btn-upgrade">Upgrade Plan <i data-lucide="arrow-right" width="14"></i></button>
+            <button class="btn-upgrade" id="sidebarRenewBtn">Renew Plan <i data-lucide="arrow-right" width="14"></i></button>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="main-content">
-        <!-- HEADER -->
         <header class="header">
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <button class="mobile-toggle" id="mobileToggle">
-                    <i data-lucide="menu"></i>
-                </button>
-                <div class="search-container">
-                    <i data-lucide="search" width="16" color="#94A3B8"></i>
-                    <input type="text" placeholder="Search customers, packages...">
-                </div>
-            </div>
-            
+            <button class="mobile-toggle" id="mobileToggle"><i data-lucide="menu"></i></button>
             <div class="header-profile">
-                <div class="notification">
-                    <i data-lucide="bell" width="20"></i>
-                    <div class="notification-dot"></div>
-                </div>
-                
                 <div class="profile-dropdown-container">
                     <button class="profile-btn" id="profileToggleBtn">
                         <div class="avatar" id="navAvatar">--</div>
@@ -183,61 +209,137 @@
                         </div>
                         <i data-lucide="chevron-down" width="16" color="#94A3B8"></i>
                     </button>
-                    
                     <div class="profile-dropdown" id="profileDropdown">
-                        <button class="dropdown-item"><i data-lucide="user" width="16"></i> My Profile</button>
-                        <button class="dropdown-item"><i data-lucide="settings" width="16"></i> Settings</button>
-                        <div class="dropdown-divider"></div>
                         <button class="dropdown-item text-red" id="logoutBtn"><i data-lucide="log-out" width="16"></i> Sign Out</button>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- PAYMENTS DASHBOARD -->
-        <div class="dashboard-container" style="padding: 32px;">
-            <div class="page-header">
-                <div>
-                    <h1>Payments Ledger.</h1>
-                    <p>Real-time audit log of all M-Pesa transactions and generated vouchers.</p>
+        <div class="dashboard-container">
+            <div class="page-top">
+                <div class="page-header">
+                    <div class="page-eyebrow">Billing & Ledger</div>
+                    <h1>Payments & Wallet</h1>
+                    <p>Manage your transaction fee wallet, monthly subscription, and customer M-Pesa ledger.</p>
                 </div>
+                <button class="btn-refresh" id="btnRefreshAll"><i data-lucide="refresh-cw" width="15"></i> Refresh</button>
             </div>
 
-            <!-- KPIs -->
+            <!-- 2x2 RESPONSIVE KPI GRID -->
             <div class="kpi-grid">
-                <div class="card" style="padding: 16px 20px;">
-                    <div class="kpi-label">Total Revenue</div>
-                    <div class="kpi-val" id="kpi-revenue" style="color: var(--primary);">KSh 0</div>
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon blue"><i data-lucide="wallet" width="18"></i></div>
+                        <span class="kpi-tag">Tx Wallet</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Payment Wallet</div>
+                        <div class="kpi-value" id="kpi-wallet">KES 0.00</div>
+                        <div class="kpi-sub" id="kpi-wallet-sub">For customer tx fees</div>
+                    </div>
                 </div>
-                <div class="card" style="padding: 16px 20px;">
-                    <div class="kpi-label">Transactions</div>
-                    <div class="kpi-val" id="kpi-transactions">0</div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon purple"><i data-lucide="calendar-check" width="18"></i></div>
+                        <span class="kpi-tag">Monthly Plan</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Subscription</div>
+                        <div class="kpi-value" id="kpi-sub-status">Active</div>
+                        <div class="kpi-sub" id="kpi-sub-expiry">KES 1,300 / month</div>
+                    </div>
                 </div>
-                <div class="card" style="padding: 16px 20px;">
-                    <div class="kpi-label">Pending / Failed</div>
-                    <div class="kpi-val" id="kpi-failed" style="color: #EF4444;">0</div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon green"><i data-lucide="trending-up" width="18"></i></div>
+                        <span class="kpi-tag">Revenue</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Total Revenue</div>
+                        <div class="kpi-value" id="kpi-revenue">KES 0</div>
+                        <div class="kpi-sub">Completed customer sales</div>
+                    </div>
                 </div>
-                <div class="card" style="padding: 16px 20px;">
-                    <div class="kpi-label">SMS Delivered</div>
-                    <div class="kpi-val" id="kpi-sms">0%</div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon amber"><i data-lucide="receipt" width="18"></i></div>
+                        <span class="kpi-tag">Volume</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Transactions</div>
+                        <div class="kpi-value" id="kpi-transactions">0</div>
+                        <div class="kpi-sub" id="kpi-failed">0 pending / failed</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- MAIN TABLE CARD -->
-            <div class="card" style="padding: 0;">
+            <!-- PAYMENT WALLET TOP-UP CARD -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title"><i data-lucide="coins" width="18"></i> Top Up Payment Wallet</h2>
+                        <div class="card-subtitle">Used to cover M-Pesa transaction fees when your customers buy Wi-Fi packages.</div>
+                    </div>
+                    <button type="button" class="btn-primary btn-green" id="btnOpenRenew" style="height: 38px; padding: 0 16px; font-size: 0.8rem;">
+                        <i data-lucide="shield-check" width="15"></i> Pay Monthly Fee (KES 1,300)
+                    </button>
+                </div>
+
+                <div class="warning-banner">
+                    <i data-lucide="alert-triangle" width="18" style="flex-shrink: 0; margin-top: 1px;"></i>
+                    <span><strong>Important Notice:</strong> All Payment Wallet deposits are strictly for platform transaction fees and are <strong>non-withdrawable and non-refundable</strong>. Minimum deposit is <strong>KES 100</strong>.</span>
+                </div>
+
+                <div class="preset-row" id="presetRow">
+                    <button type="button" class="preset-chip active" data-amount="100">KES 100</button>
+                    <button type="button" class="preset-chip" data-amount="250">KES 250</button>
+                    <button type="button" class="preset-chip" data-amount="500">KES 500</button>
+                    <button type="button" class="preset-chip" data-amount="1000">KES 1,000</button>
+                    <button type="button" class="preset-chip" data-amount="2500">KES 2,500</button>
+                </div>
+
+                <form id="formWalletTopUp" class="topup-grid">
+                    <div class="form-group">
+                        <label>Deposit Amount (KES)</label>
+                        <input type="number" id="walletTopUpAmount" value="100" min="100" step="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>M-Pesa Phone (Optional)</label>
+                        <input type="tel" id="walletTopUpPhone" placeholder="e.g. 0712345678 (uses default if blank)">
+                    </div>
+                    <button type="submit" class="btn-primary" id="btnWalletTopUp">
+                        <i data-lucide="credit-card" width="16"></i> Deposit via M-Pesa
+                    </button>
+                </form>
+            </div>
+
+            <!-- PAYMENTS LEDGER CARD -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title"><i data-lucide="list" width="18"></i> Customer Payments Ledger</h2>
+                        <div class="card-subtitle">Real-time audit log of all M-Pesa transactions and generated vouchers.</div>
+                    </div>
+                </div>
+
                 <div class="toolbar">
                     <div class="filter-tabs">
                         <button class="filter-btn active" data-filter="all">All</button>
                         <button class="filter-btn" data-filter="completed">Completed</button>
                         <button class="filter-btn" data-filter="failed">Failed / Pending</button>
                     </div>
-                    <div class="search-container" style="max-width: 300px; padding: 8px 12px; display: flex;">
-                        <i data-lucide="search" width="14" color="#94A3B8"></i>
-                        <input type="text" id="searchPayments" placeholder="Search M-Pesa code or phone..." style="font-size: 0.75rem;">
+                    <div class="search-box">
+                        <i data-lucide="search" width="15" color="#94A3B8"></i>
+                        <input type="text" id="searchPayments" placeholder="Search M-Pesa code, phone, voucher...">
                     </div>
                 </div>
+
                 <div class="table-responsive">
-                    <table style="margin-bottom: 12px;">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Date & Time</th>
@@ -250,7 +352,7 @@
                             </tr>
                         </thead>
                         <tbody id="payments-tbody">
-                            <!-- JS Injects Here -->
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading payments...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -258,10 +360,26 @@
         </div>
     </main>
 
-    <!-- TOAST NOTIFICATIONS -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- MONTHLY SUBSCRIPTION PAYWALL MODAL -->
+    <div class="paywall-backdrop" id="paywallModal">
+        <div class="paywall-modal">
+            <div class="paywall-icon"><i data-lucide="lock" width="26"></i></div>
+            <h2 id="paywallTitle">Monthly Subscription Required</h2>
+            <p id="paywallDesc">Your monthly ISPConnect platform fee (<strong>KES 1,300</strong>) is due. Complete payment via M-Pesa to restore your dashboard and customer captive portal immediately.</p>
+            <form id="formPaySub">
+                <div class="form-group">
+                    <label>M-Pesa Phone Number</label>
+                    <input type="tel" id="subPayPhone" placeholder="e.g. 0712345678" required>
+                </div>
+                <button type="submit" class="btn-primary btn-green" id="btnPaySub" style="width: 100%;">
+                    <i data-lucide="smartphone" width="16"></i> Pay KES 1,300 via M-Pesa
+                </button>
+            </form>
+            <button type="button" id="btnClosePaywall" style="display:none; margin-top: 12px; background: transparent; border: none; color: var(--text-muted); font-size: 0.82rem; cursor: pointer; font-weight: 600;">Cancel</button>
+        </div>
+    </div>
 
-    <!-- Loads payments.js -->
+    <div class="toast-container" id="toastContainer"></div>
     <script src="payments.js"></script>
 </body>
 </html>

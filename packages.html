@@ -20,10 +20,10 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; height: 100dvh; overflow: hidden; }
 
         /* SIDEBAR */
-        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid #E2E8F0; display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; }
+        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid #E2E8F0; display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; flex-shrink: 0; }
         .logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 32px; padding: 0 8px; }
         .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
@@ -39,15 +39,15 @@
 
         .mobile-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 40; display: none; backdrop-filter: blur(2px); }
         .mobile-overlay.active { display: block; }
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; position: relative; }
         
         /* HEADER */
-        .header { background: var(--bg); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; }
-        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); }
+        .header { background: var(--bg); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; border-bottom: 1px solid rgba(226,232,240,0.6); }
+        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); padding: 4px; }
         .search-container { display: flex; align-items: center; gap: 8px; background: var(--card-bg); padding: 10px 16px; border-radius: 8px; width: 100%; max-width: 350px; border: 1px solid #E2E8F0; }
         .search-container input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.85rem; color: var(--text-dark); }
         
-        .header-profile { display: flex; align-items: center; gap: 24px; }
+        .header-profile { display: flex; align-items: center; gap: 20px; }
         .notification { position: relative; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; }
         .notification-dot { position: absolute; top: 0px; right: 2px; width: 8px; height: 8px; background: #EF4444; border-radius: 50%; border: 2px solid var(--bg); }
         
@@ -67,30 +67,30 @@
         .dropdown-item.text-red:hover { background: #FEF2F2; }
         .dropdown-divider { height: 1px; background: #E2E8F0; margin: 4px 0; }
 
-        .dashboard-container { padding: 0 32px 32px; display: flex; flex-direction: column; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .dashboard-container { padding: 24px 32px 40px; display: flex; flex-direction: column; max-width: 1400px; margin: 0 auto; width: 100%; }
         .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: var(--shadow-sm); overflow: hidden; }
 
         /* --- PACKAGES SPECIFIC STYLES --- */
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
         .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
         .page-header p { color: var(--text-muted); font-size: 0.85rem; }
         
-        .btn-primary { background: var(--blue); color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; transition: background 0.2s; }
+        .btn-primary { background: var(--blue); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; transition: background 0.2s; white-space: nowrap; }
         .btn-primary:hover { background: #0056b3; }
         
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
         .kpi-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; text-transform: uppercase; }
-        .kpi-val { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); }
+        .kpi-val { font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
 
-        .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0; }
-        .filter-tabs { display: flex; gap: 8px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0; gap: 12px; flex-wrap: wrap; }
+        .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .filter-btn { padding: 6px 12px; border-radius: 99px; border: 1px solid #E2E8F0; background: transparent; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
         .filter-btn.active { background: var(--text-dark); color: #fff; border-color: var(--text-dark); }
         
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+        table { width: 100%; border-collapse: collapse; min-width: 640px; }
         th { text-align: left; font-size: 0.75rem; font-weight: 500; color: var(--text-muted); padding: 12px 20px; border-bottom: 1px solid #F1F5F9; white-space: nowrap; }
         td { padding: 14px 20px; font-size: 0.85rem; color: var(--text-dark); border-bottom: 1px solid #F8FAFC; vertical-align: middle; white-space: nowrap; }
-        .table-responsive { overflow-x: auto; width: 100%; }
         
         .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; }
         .status-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
@@ -104,46 +104,57 @@
         .action-btn.delete:hover { background: #FEF2F2; color: #EF4444; }
 
         /* MODAL STYLES */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 100; display: none; backdrop-filter: blur(2px); justify-content: center; align-items: center; }
-        .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; transform: translateY(20px); transition: transform 0.3s ease; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 100; display: none; backdrop-filter: blur(2px); justify-content: center; align-items: center; padding: 16px; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 600px; border-radius: 14px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90dvh; display: flex; flex-direction: column; overflow: hidden; transform: translateY(20px); transition: transform 0.3s ease; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .modal-header { padding: 20px 24px; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header { padding: 18px 22px; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .modal-header h2 { font-size: 1.1rem; font-weight: 600; }
-        .close-btn { background: transparent; border: none; cursor: pointer; color: var(--text-muted); }
+        .close-btn { background: transparent; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; }
         
-        .modal-body { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
-        .form-section { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; }
-        .form-section h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 16px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+        .modal-body { padding: 20px 22px; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 18px; }
+        .form-section { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; }
+        .form-section h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 14px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
         
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
-        .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 0.85rem; outline: none; transition: border 0.2s; }
+        .form-group label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 0.88rem; outline: none; background: #fff; transition: border 0.2s; }
         .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
         
-        .modal-footer { padding: 16px 24px; border-top: 1px solid #E2E8F0; display: flex; justify-content: flex-end; gap: 12px; background: #F8FAFC; }
-        .btn-secondary { background: #fff; border: 1px solid #E2E8F0; padding: 10px 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; color: var(--text-dark); transition: background 0.2s; }
+        .modal-footer { padding: 14px 22px; border-top: 1px solid #E2E8F0; display: flex; justify-content: flex-end; gap: 10px; background: #F8FAFC; flex-shrink: 0; }
+        .btn-secondary { background: #fff; border: 1px solid #E2E8F0; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; color: var(--text-dark); transition: background 0.2s; }
         .btn-secondary:hover { background: #F8FAFC; }
         
         /* TOAST NOTIFICATION */
-        .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 9999; }
-        .toast { background: #1E293B; color: #fff; padding: 16px 20px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: 500; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; max-width: 360px; }
+        .toast { background: #1E293B; color: #fff; padding: 14px 18px; border-radius: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 500; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.error { border-left: 4px solid #EF4444; }
         .toast.success { border-left: 4px solid var(--primary); }
 
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; }
             .sidebar.open { left: 0; }
-            .header { padding: 16px; }
+            .header { padding: 12px 16px; }
             .mobile-toggle { display: block; }
-            .dashboard-container { padding: 0 16px 16px; }
+            .dashboard-container { padding: 16px 14px 32px; }
+            .page-header h1 { font-size: 1.3rem; }
             .profile-info { display: none; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; }
-            .search-container { display: none; }
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+            .kpi-val { font-size: 1.35rem; }
+            .header .search-container { display: none; }
+            .toolbar { padding: 14px; }
+            .toolbar .search-container { max-width: none !important; width: 100%; }
+            .form-grid { grid-template-columns: 1fr; }
+            .modal-body { padding: 16px; }
+            .toast-container { left: 14px; right: 14px; bottom: 14px; max-width: none; }
         }
     </style>
 </head>
@@ -161,7 +172,6 @@
             <a href="dashboard.html" class="nav-item"><i data-lucide="home" width="18"></i> Dashboard</a>
             <a href="mikrotik.html" class="nav-item"><i data-lucide="hard-drive" width="18"></i> MikroTik</a>
             <a href="customers.html" class="nav-item"><i data-lucide="users" width="18"></i> Customers</a>
-            <!-- Packages is Active here -->
             <a href="packages.html" class="nav-item active"><i data-lucide="package" width="18"></i> Packages</a>
             <a href="payments.html" class="nav-item"><i data-lucide="file-text" width="18"></i> Payments</a>
             <a href="subscriptions.html" class="nav-item"><i data-lucide="refresh-cw" width="18"></i> Subscriptions</a>
@@ -220,7 +230,7 @@
         </header>
 
         <!-- PACKAGES DASHBOARD -->
-        <div class="dashboard-container" style="padding: 32px;">
+        <div class="dashboard-container">
             <div class="page-header">
                 <div>
                     <h1>Your packages.</h1>
@@ -336,16 +346,16 @@
                         <h3><i data-lucide="gauge" width="16" color="var(--purple)"></i> Speed & Limits</h3>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>DOWNLOAD SPEED (Kbps) *</label>
-                                <input type="number" id="pkgDownload" placeholder="e.g. 5120 for 5Mbps" required>
+                                <label>DOWNLOAD SPEED (Mbps) *</label>
+                                <input type="number" id="pkgDownload" step="0.1" min="0.1" placeholder="e.g. 5 for 5 Mbps" required>
                             </div>
                             <div class="form-group">
-                                <label>UPLOAD SPEED (Kbps) *</label>
-                                <input type="number" id="pkgUpload" placeholder="e.g. 5120 for 5Mbps" required>
+                                <label>UPLOAD SPEED (Mbps) *</label>
+                                <input type="number" id="pkgUpload" step="0.1" min="0.1" placeholder="e.g. 5 for 5 Mbps" required>
                             </div>
                             <div class="form-group full">
                                 <label>DEVICES PER ACCOUNT</label>
-                                <input type="number" id="pkgDevices" value="1" required>
+                                <input type="number" id="pkgDevices" value="1" min="1" required>
                             </div>
                         </div>
                     </div>

@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Block access if the JWT token is missing
     if (!adminName || !ispToken) {
-        window.location.href = 'register.html?view=login';
+        window.location.href = '/register.html?view=login';
         return;
     }
     
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("adminName");
         localStorage.removeItem("isp_token");
         localStorage.removeItem("companyName");
-        window.location.href = 'register.html?view=login';
+        window.location.href = '/register.html?view=login';
     });
 
     const sidebar = document.getElementById("sidebar");
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- 4. PACKAGES PAGE LOGIC ---
-    const API_BASE = 'https://api.ispconnect.co.ke/api/admin';
+    const API_BASE = 'http://212.95.56.131:8001/api/admin';
     let currentPackages = [];
 
     // Formatters
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatSpeed(kbps) {
         if (!kbps || kbps === 0) return "Unlimited";
-        if (kbps >= 1024) return `${(kbps / 1024).toFixed(0)}M`;
+        if (kbps >= 1024) return `${parseFloat((kbps / 1024).toFixed(1))}M`;
         return `${kbps}K`;
     }
 
@@ -151,8 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('pkgStatus').value = pkg.is_active;
             document.getElementById('pkgPrice').value = pkg.price;
             document.getElementById('pkgDuration').value = pkg.duration_seconds / 60; 
-            document.getElementById('pkgDownload').value = pkg.speed_download_kbps;
-            document.getElementById('pkgUpload').value = pkg.speed_upload_kbps;
+            document.getElementById('pkgDownload').value = pkg.speed_download_kbps ? parseFloat((pkg.speed_download_kbps / 1024).toFixed(2)) : '';
+            document.getElementById('pkgUpload').value = pkg.speed_upload_kbps ? parseFloat((pkg.speed_upload_kbps / 1024).toFixed(2)) : '';
             document.getElementById('pkgDevices').value = pkg.devices;
         } else {
             document.getElementById('modalTitle').textContent = 'Create a package';
@@ -313,8 +313,8 @@ document.addEventListener("DOMContentLoaded", () => {
             type: document.getElementById('pkgType').value,
             price: parseFloat(document.getElementById('pkgPrice').value),
             duration_seconds: parseInt(document.getElementById('pkgDuration').value) * 60,
-            speed_download_kbps: parseInt(document.getElementById('pkgDownload').value),
-            speed_upload_kbps: parseInt(document.getElementById('pkgUpload').value),
+            speed_download_kbps: Math.round(parseFloat(document.getElementById('pkgDownload').value) * 1024),
+            speed_upload_kbps: Math.round(parseFloat(document.getElementById('pkgUpload').value) * 1024),
             devices: parseInt(document.getElementById('pkgDevices').value),
             is_active: document.getElementById('pkgStatus').value === 'true'
         };

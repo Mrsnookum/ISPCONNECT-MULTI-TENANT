@@ -1,10 +1,10 @@
 (function () {
     const API_BILLING = 'https://api.ispconnect.co.ke/api/billing';
     const IDLE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
-    const LOGIN_URL = 'register.html?view=login';
+    const LOGIN_URL = '/register.html?view=login';
 
     const ispToken = localStorage.getItem('isp_token');
-    if (!ispToken) return; // Individual page auth handles missing tokens
+    if (!ispToken) return;
 
     // =========================================================
     // 1. 5-MINUTE INACTIVITY AUTO-LOGOUT
@@ -40,7 +40,6 @@
         window.addEventListener(evt, resetIdleTimer, { passive: true });
     });
 
-    // Catch sleeping/background tabs immediately when the user returns
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) checkIdleAndLogout();
     });
@@ -50,46 +49,114 @@
     // =========================================================
     // 2. GLOBAL SUBSCRIPTION PAYWALL & AUTO-UNLOCK
     // =========================================================
+    const LOCK_SVG = `
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>`;
+
+    const CHECK_SVG = `
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>`;
+
+    const SPINNER_SVG = `
+        <svg class="guard-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+        </svg>`;
+
     function injectGuardStyles() {
         if (document.getElementById('ispGuardStyle')) return;
         const style = document.createElement('style');
         style.id = 'ispGuardStyle';
         style.textContent = `
+            @keyframes guardFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes guardPopIn {
+                0% { opacity: 0; transform: translateY(16px) scale(0.95); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes guardPulse {
+                0% { transform: scale(0.95); opacity: 0.7; }
+                70% { transform: scale(1.45); opacity: 0; }
+                100% { transform: scale(1.45); opacity: 0; }
+            }
+            @keyframes guardFloat {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-3px); }
+            }
+            @keyframes guardSpin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
             #ispGuardBackdrop {
-                position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85);
-                backdrop-filter: blur(6px); z-index: 99999; display: flex;
+                position: fixed; inset: 0; background: rgba(15, 23, 42, 0.82);
+                backdrop-filter: blur(8px); z-index: 99999; display: flex;
                 align-items: center; justify-content: center; padding: 16px;
                 font-family: 'Inter', sans-serif;
+                animation: guardFadeIn 0.25s ease forwards;
             }
             #ispGuardModal {
-                background: #ffffff; color: #1E293B; border-radius: 16px;
-                max-width: 430px; width: 100%; padding: 28px 24px;
-                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35); text-align: center;
+                background: #ffffff; color: #1E293B; border-radius: 18px;
+                max-width: 430px; width: 100%; padding: 32px 26px 26px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08);
+                text-align: center;
+                animation: guardPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            .guard-icon-wrap {
+                position: relative; width: 64px; height: 64px; margin: 0 auto 18px;
+                display: flex; align-items: center; justify-content: center;
+            }
+            .guard-icon-ring {
+                position: absolute; inset: 0; border-radius: 50%;
+                background: rgba(239, 68, 68, 0.22);
+                animation: guardPulse 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
             }
             .guard-icon {
-                width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px;
-                background: #FEE2E2; color: #EF4444; display: flex;
-                align-items: center; justify-content: center; font-size: 24px;
+                position: relative; z-index: 2; width: 58px; height: 58px;
+                border-radius: 50%; background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+                color: #EF4444; display: flex; align-items: center; justify-content: center;
+                border: 1px solid rgba(239, 68, 68, 0.18);
+                box-shadow: 0 6px 16px rgba(239, 68, 68, 0.14);
+                transition: all 0.3s ease;
             }
-            #ispGuardModal h2 { font-size: 1.25rem; font-weight: 700; margin: 0 0 8px; }
-            #ispGuardModal p { font-size: 0.85rem; color: #64748B; line-height: 1.5; margin: 0 0 18px; }
+            .guard-icon svg { animation: guardFloat 2.8s ease-in-out infinite; }
+            .guard-icon.unlocked {
+                background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+                color: #00B37E; border-color: rgba(0, 179, 126, 0.25);
+                box-shadow: 0 6px 16px rgba(0, 179, 126, 0.2);
+            }
+            .guard-icon-ring.unlocked { background: rgba(0, 179, 126, 0.25); }
+
+            #ispGuardModal h2 { font-size: 1.28rem; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+            #ispGuardModal p { font-size: 0.86rem; color: #64748B; line-height: 1.55; margin: 0 0 20px; }
             .guard-field { text-align: left; margin-bottom: 14px; }
-            .guard-field label { display: block; font-size: 0.72rem; font-weight: 600; color: #64748B; text-transform: uppercase; margin-bottom: 6px; }
+            .guard-field label { display: block; font-size: 0.72rem; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
             .guard-field input {
-                width: 100%; padding: 11px 14px; border: 1px solid #CBD5E1;
-                border-radius: 10px; font-size: 0.9rem; outline: none; box-sizing: border-box;
+                width: 100%; padding: 12px 14px; border: 1px solid #CBD5E1;
+                border-radius: 10px; font-size: 0.92rem; outline: none; box-sizing: border-box;
+                transition: border-color 0.2s, box-shadow 0.2s;
             }
-            .guard-field input:focus { border-color: #00B37E; }
+            .guard-field input:focus { border-color: #00B37E; box-shadow: 0 0 0 3px rgba(0, 179, 126, 0.12); }
             .guard-btn {
-                width: 100%; padding: 12px 18px; border: none; border-radius: 10px;
+                width: 100%; padding: 13px 18px; border: none; border-radius: 10px;
                 background: #00B37E; color: #fff; font-size: 0.9rem; font-weight: 600;
-                cursor: pointer; transition: opacity 0.2s;
+                cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+                transition: transform 0.15s ease, background 0.2s ease, opacity 0.2s;
+                box-shadow: 0 4px 12px rgba(0, 179, 126, 0.25);
             }
-            .guard-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+            .guard-btn:hover:not(:disabled) { background: #009B6D; transform: translateY(-1px); }
+            .guard-btn:active:not(:disabled) { transform: translateY(0); }
+            .guard-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+            .guard-spin { animation: guardSpin 0.85s linear infinite; }
             .guard-status { margin-top: 12px; font-size: 0.8rem; font-weight: 500; min-height: 18px; }
             .guard-logout {
                 margin-top: 14px; background: transparent; border: none;
                 color: #64748B; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+                transition: color 0.2s;
             }
             .guard-logout:hover { color: #EF4444; }
         `;
@@ -101,19 +168,23 @@
         injectGuardStyles();
         document.body.style.overflow = 'hidden';
 
+        const formattedFee = Number(monthlyFee).toLocaleString();
         const backdrop = document.createElement('div');
         backdrop.id = 'ispGuardBackdrop';
         backdrop.innerHTML = `
             <div id="ispGuardModal">
-                <div class="guard-icon">&#128274;</div>
-                <h2>Subscription Expired</h2>
-                <p>Your ISPConnect monthly fee (<strong>KES ${Number(monthlyFee).toLocaleString()}</strong>) is overdue. Your dashboard and customer captive portal are currently locked. Pay via M-Pesa below to unlock everything immediately.</p>
+                <div class="guard-icon-wrap">
+                    <div class="guard-icon-ring" id="guardIconRing"></div>
+                    <div class="guard-icon" id="guardIcon">${LOCK_SVG}</div>
+                </div>
+                <h2 id="guardTitle">Subscription Expired</h2>
+                <p>Your ISPConnect monthly fee (<strong>KES ${formattedFee}</strong>) is overdue. Your dashboard and customer captive portal are currently locked. Pay via M-Pesa below to unlock everything immediately.</p>
                 <form id="ispGuardForm">
                     <div class="guard-field">
                         <label>M-Pesa Phone Number</label>
                         <input type="tel" id="ispGuardPhone" value="${defaultPhone || ''}" placeholder="e.g. 0712345678" required>
                     </div>
-                    <button type="submit" class="guard-btn" id="ispGuardPayBtn">Pay KES ${Number(monthlyFee).toLocaleString()} via M-Pesa</button>
+                    <button type="submit" class="guard-btn" id="ispGuardPayBtn">Pay KES ${formattedFee} via M-Pesa</button>
                 </form>
                 <div class="guard-status" id="ispGuardStatus"></div>
                 <button type="button" class="guard-logout" id="ispGuardLogout">Sign Out</button>
@@ -131,7 +202,7 @@
             const statusEl = document.getElementById('ispGuardStatus');
 
             btn.disabled = true;
-            btn.textContent = 'Sending STK Push...';
+            btn.innerHTML = `${SPINNER_SVG} Sending STK Push...`;
             statusEl.style.color = '#64748B';
             statusEl.textContent = '';
 
@@ -147,16 +218,15 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || 'Payment initiation failed');
 
-                btn.textContent = 'Waiting for M-Pesa PIN...';
+                btn.innerHTML = `${SPINNER_SVG} Waiting for M-Pesa PIN...`;
                 statusEl.style.color = '#007BFF';
                 statusEl.textContent = 'Check your phone and enter your M-Pesa PIN. Unlocking automatically...';
 
-                // Poll every 4 seconds for up to 2 minutes
                 let attempts = 0;
                 clearInterval(pollTimer);
                 pollTimer = setInterval(async () => {
                     attempts++;
-                    resetIdleTimer(); // Keep session alive while waiting for M-Pesa
+                    resetIdleTimer();
                     try {
                         const checkRes = await fetch(`${API_BILLING}/wallet-status`, {
                             headers: { 'Authorization': `Bearer ${ispToken}` }
@@ -165,8 +235,15 @@
                             const checkData = await checkRes.json();
                             if (!checkData.is_suspended) {
                                 clearInterval(pollTimer);
+                                const iconEl = document.getElementById('guardIcon');
+                                const ringEl = document.getElementById('guardIconRing');
+                                iconEl.classList.add('unlocked');
+                                ringEl.classList.add('unlocked');
+                                iconEl.innerHTML = CHECK_SVG;
+                                document.getElementById('guardTitle').textContent = 'Subscription Restored';
+                                btn.innerHTML = 'Unlocked!';
                                 statusEl.style.color = '#00B37E';
-                                statusEl.textContent = 'Payment confirmed! Unlocking your dashboard...';
+                                statusEl.textContent = 'Payment confirmed! Loading your dashboard...';
                                 setTimeout(() => window.location.reload(), 1200);
                             }
                         }
@@ -175,14 +252,14 @@
                     if (attempts >= 30) {
                         clearInterval(pollTimer);
                         btn.disabled = false;
-                        btn.textContent = `Pay KES ${Number(monthlyFee).toLocaleString()} via M-Pesa`;
+                        btn.textContent = `Pay KES ${formattedFee} via M-Pesa`;
                         statusEl.style.color = '#D97706';
                         statusEl.textContent = 'Still waiting. If you already paid, refresh the page.';
                     }
                 }, 4000);
             } catch (err) {
                 btn.disabled = false;
-                btn.textContent = `Pay KES ${Number(monthlyFee).toLocaleString()} via M-Pesa`;
+                btn.textContent = `Pay KES ${formattedFee} via M-Pesa`;
                 statusEl.style.color = '#EF4444';
                 statusEl.textContent = err.message || 'Failed to send STK Push.';
             }

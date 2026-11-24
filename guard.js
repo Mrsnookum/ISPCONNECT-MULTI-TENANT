@@ -1,7 +1,7 @@
 (function () {
     const API_BILLING = 'https://api.ispconnect.co.ke/api/billing';
     const IDLE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
-    const LOGIN_URL = '/register.html?view=login';
+    const LOGIN_URL = 'register.html?view=login';
 
     const ispToken = localStorage.getItem('isp_token');
     if (!ispToken) return;
@@ -163,12 +163,20 @@
         document.head.appendChild(style);
     }
 
-    function showHardPaywall(defaultPhone, monthlyFee) {
+    function showHardPaywall(defaultPhone, monthlyFee, isTrial = false) {
         if (document.getElementById('ispGuardBackdrop')) return;
         injectGuardStyles();
         document.body.style.overflow = 'hidden';
 
         const formattedFee = Number(monthlyFee).toLocaleString();
+        const modalTitle = isTrial ? '14-Day Trial Ended' : 'Subscription Expired';
+        const modalCopy = isTrial
+            ? `Your 14-day free trial has ended and your dashboard & customer captive portal are now locked. Pay <strong>KES ${formattedFee}</strong> via M-Pesa below to activate your account and start your 30-day cycle.`
+            : `Your ISPConnect monthly fee (<strong>KES ${formattedFee}</strong>) is overdue. Your dashboard and customer captive portal are currently locked. Pay via M-Pesa below to unlock everything immediately.`;
+        const defaultBtnLabel = isTrial
+            ? `Activate Account · KES ${formattedFee}`
+            : `Pay KES ${formattedFee} via M-Pesa`;
+
         const backdrop = document.createElement('div');
         backdrop.id = 'ispGuardBackdrop';
         backdrop.innerHTML = `
@@ -177,14 +185,14 @@
                     <div class="guard-icon-ring" id="guardIconRing"></div>
                     <div class="guard-icon" id="guardIcon">${LOCK_SVG}</div>
                 </div>
-                <h2 id="guardTitle">Subscription Expired</h2>
-                <p>Your ISPConnect monthly fee (<strong>KES ${formattedFee}</strong>) is overdue. Your dashboard and customer captive portal are currently locked. Pay via M-Pesa below to unlock everything immediately.</p>
+                <h2 id="guardTitle">${modalTitle}</h2>
+                <p>${modalCopy}</p>
                 <form id="ispGuardForm">
                     <div class="guard-field">
                         <label>M-Pesa Phone Number</label>
                         <input type="tel" id="ispGuardPhone" value="${defaultPhone || ''}" placeholder="e.g. 0712345678" required>
                     </div>
-                    <button type="submit" class="guard-btn" id="ispGuardPayBtn">Pay KES ${formattedFee} via M-Pesa</button>
+                    <button type="submit" class="guard-btn" id="ispGuardPayBtn">${defaultBtnLabel}</button>
                 </form>
                 <div class="guard-status" id="ispGuardStatus"></div>
                 <button type="button" class="guard-logout" id="ispGuardLogout">Sign Out</button>
@@ -240,7 +248,7 @@
                                 iconEl.classList.add('unlocked');
                                 ringEl.classList.add('unlocked');
                                 iconEl.innerHTML = CHECK_SVG;
-                                document.getElementById('guardTitle').textContent = 'Subscription Restored';
+                                document.getElementById('guardTitle').textContent = isTrial ? 'Account Activated' : 'Subscription Restored';
                                 btn.innerHTML = 'Unlocked!';
                                 statusEl.style.color = '#00B37E';
                                 statusEl.textContent = 'Payment confirmed! Loading your dashboard...';
@@ -252,14 +260,14 @@
                     if (attempts >= 30) {
                         clearInterval(pollTimer);
                         btn.disabled = false;
-                        btn.textContent = `Pay KES ${formattedFee} via M-Pesa`;
+                        btn.textContent = defaultBtnLabel;
                         statusEl.style.color = '#D97706';
                         statusEl.textContent = 'Still waiting. If you already paid, refresh the page.';
                     }
                 }, 4000);
             } catch (err) {
                 btn.disabled = false;
-                btn.textContent = `Pay KES ${formattedFee} via M-Pesa`;
+                btn.textContent = defaultBtnLabel;
                 statusEl.style.color = '#EF4444';
                 statusEl.textContent = err.message || 'Failed to send STK Push.';
             }
@@ -278,7 +286,7 @@
             if (!res.ok) return;
             const data = await res.json();
             if (data.is_suspended) {
-                showHardPaywall(data.support_phone, data.monthly_fee || 1300);
+                showHardPaywall(data.support_phone, data.monthly_fee || 1300, Boolean(data.is_trial));
             }
         } catch (err) {
             console.error('Guard check failed:', err);

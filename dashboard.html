@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | ISPConnect</title>
     <link rel="icon" type="image/jpeg" sizes="32x32" href="favicon.jpg">
-<link rel="icon" type="image/jpeg" sizes="192x192" href="favicon.jpg">
-<link rel="apple-touch-icon" href="favicon.jpg">
+    <link rel="icon" type="image/jpeg" sizes="192x192" href="favicon.jpg">
+    <link rel="apple-touch-icon" href="favicon.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -81,6 +81,55 @@
         .card-title-group { display: flex; flex-direction: column; gap: 4px; }
         .card-title { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 600; color: var(--text-dark); }
         .card-subtitle { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* ONBOARDING CHECKLIST STRIP */
+        .onboarding-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+            border: 1px solid #CBD5E1;
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow-sm);
+            display: none;
+        }
+        .onboarding-card.visible { display: block; }
+        .onboarding-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .onboarding-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .onboarding-title { font-size: 0.95rem; font-weight: 700; color: var(--text-dark); }
+        .trial-pill {
+            background: #FEF3C7; color: #B45309; font-size: 0.7rem; font-weight: 600;
+            padding: 3px 10px; border-radius: 99px; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .onboarding-sub { font-size: 0.76rem; color: var(--text-muted); margin-top: 3px; }
+        .onboarding-dismiss {
+            background: transparent; border: none; color: #94A3B8; cursor: pointer;
+            padding: 4px; border-radius: 6px; display: flex; align-items: center; transition: all 0.2s;
+        }
+        .onboarding-dismiss:hover { background: #F1F5F9; color: var(--text-dark); }
+        .onboarding-progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .onboarding-progress-track { flex: 1; height: 6px; background: #E2E8F0; border-radius: 99px; overflow: hidden; }
+        .onboarding-progress-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 99px; transition: width 0.35s ease; }
+        .onboarding-progress-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+        .onboarding-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .onboarding-step {
+            display: flex; align-items: center; gap: 10px; padding: 11px 12px;
+            border-radius: 10px; border: 1px solid #E2E8F0; background: #FFFFFF;
+            text-decoration: none; color: var(--text-dark); transition: all 0.2s; min-width: 0;
+        }
+        .onboarding-step:hover { border-color: var(--blue); transform: translateY(-1px); }
+        .onboarding-step.done { background: #F0FDF9; border-color: #A7F3D0; }
+        .step-badge {
+            width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700; background: #F1F5F9; color: var(--text-muted);
+        }
+        .onboarding-step.done .step-badge { background: var(--primary); color: #FFFFFF; }
+        .step-meta { min-width: 0; flex: 1; }
+        .step-name { font-size: 0.8rem; font-weight: 600; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .onboarding-step.done .step-name { color: #065F46; }
+        .step-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         /* KPIs */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
@@ -152,6 +201,7 @@
         }
         @media (max-width: 1024px) {
             .middle-grid { grid-template-columns: 1fr; }
+            .onboarding-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; height: 100dvh; }
@@ -167,6 +217,10 @@
             .kpi-spark { width: 48px; height: 24px; }
             .chart-wrapper { height: 210px; }
             .toast-container { left: 14px; right: 14px; bottom: 14px; max-width: none; }
+        }
+        @media (max-width: 600px) {
+            .onboarding-card { padding: 14px; }
+            .onboarding-steps { grid-template-columns: 1fr; gap: 8px; }
         }
         @media (max-width: 400px) {
             .kpi-grid { grid-template-columns: 1fr; }
@@ -252,6 +306,61 @@
         </header>
 
         <div class="dashboard-container">
+
+            <!-- ONBOARDING CHECKLIST (Auto-hides once all 4 steps are done) -->
+            <section class="onboarding-card" id="onboardingCard">
+                <div class="onboarding-top">
+                    <div>
+                        <div class="onboarding-title-row">
+                            <span class="onboarding-title">Get your hotspot live in 4 quick steps</span>
+                            <span class="trial-pill" id="onboardingTrialPill" style="display: none;">
+                                <i data-lucide="clock" width="12"></i>
+                                <span id="onboardingTrialText">14 days left in trial</span>
+                            </span>
+                        </div>
+                        <div class="onboarding-sub">Complete these steps to start selling Wi-Fi vouchers automatically.</div>
+                    </div>
+                    <button class="onboarding-dismiss" id="dismissOnboardingBtn" title="Dismiss checklist">
+                        <i data-lucide="x" width="18"></i>
+                    </button>
+                </div>
+                <div class="onboarding-progress-wrap">
+                    <div class="onboarding-progress-track">
+                        <div class="onboarding-progress-fill" id="onboardingProgressFill"></div>
+                    </div>
+                    <span class="onboarding-progress-label" id="onboardingProgressLabel">0 of 4 completed</span>
+                </div>
+                <div class="onboarding-steps">
+                    <a href="mikrotik.html" class="onboarding-step" id="step-mikrotik">
+                        <div class="step-badge">1</div>
+                        <div class="step-meta">
+                            <div class="step-name">Connect MikroTik</div>
+                            <div class="step-hint">Link your router</div>
+                        </div>
+                    </a>
+                    <a href="settings.html" class="onboarding-step" id="step-payhero">
+                        <div class="step-badge">2</div>
+                        <div class="step-meta">
+                            <div class="step-name">Add PayHero Keys</div>
+                            <div class="step-hint">Receive M-Pesa payouts</div>
+                        </div>
+                    </a>
+                    <a href="packages.html" class="onboarding-step" id="step-packages">
+                        <div class="step-badge">3</div>
+                        <div class="step-meta">
+                            <div class="step-name">Create First Package</div>
+                            <div class="step-hint">Set price &amp; speed</div>
+                        </div>
+                    </a>
+                    <a href="payments.html" class="onboarding-step" id="step-activated">
+                        <div class="step-badge">4</div>
+                        <div class="step-meta">
+                            <div class="step-name">Activate Plan</div>
+                            <div class="step-hint" id="step-activated-hint">KES 1,300 / month</div>
+                        </div>
+                    </a>
+                </div>
+            </section>
             
             <!-- KPIs -->
             <div class="kpi-grid">

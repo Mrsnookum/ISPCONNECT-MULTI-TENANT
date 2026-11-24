@@ -51,9 +51,30 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadPortalBranding() {
         try {
             const res = await fetch(`${API_BASE}/settings?tenant_id=${tenantId}`);
-            if (!res.ok) return;
+            if (!res.ok) return false;
             
             const config = await res.json();
+            const supportPhone = (config.support_phone || config.phone || "").trim();
+
+            // 0. Hard Suspension Check
+            if (config.suspended) {
+                const supportHtml = supportPhone
+                    ? `<p style="margin:14px 0 0;font-size:0.86rem;color:#CBD5E1;">Support: <a href="tel:${supportPhone.replace(/[^+\d]/g, '')}" style="color:#38BDF8;font-weight:700;text-decoration:none;">${supportPhone}</a></p>`
+                    : '';
+                document.body.innerHTML = `
+                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0F172A;color:#fff;font-family:Inter,sans-serif;padding:24px;text-align:center;">
+                        <div style="max-width:380px;background:#1E293B;padding:32px 24px;border-radius:16px;border:1px solid #334155;">
+                            <div style="font-size:40px;margin-bottom:12px;">&#9888;&#65039;</div>
+                            <h2 style="margin:0 0 10px;font-size:1.25rem;">Hotspot Temporarily Unavailable</h2>
+                            <p style="margin:0;font-size:0.88rem;color:#94A3B8;line-height:1.5;">
+                                This Wi-Fi service is currently suspended. Please contact your network provider for assistance.
+                            </p>
+                            ${supportHtml}
+                        </div>
+                    </div>
+                `;
+                return true;
+            }
 
             // 1. Theme Colors
             if (config.brand_primary) {
@@ -76,13 +97,17 @@ document.addEventListener("DOMContentLoaded", () => {
             // 3. Custom Logo & ISP Name
             const brandNameEl = document.getElementById('portalBrandName');
             if (config.brand_logo && brandNameEl) {
-                brandNameEl.innerHTML = `<img src="${config.brand_logo}" alt="Logo" style="max-height: 32px; border-radius: 4px;"> ${config.isp_name || 'ISPConnect'}`;
+                brandNameEl.innerHTML = `<img src="${config.brand_logo}" alt="Logo" style="max-height: 28px; vertical-align: middle; border-radius: 4px; margin-right: 6px;"> ${config.isp_name || 'ISPConnect'}`;
             } else if (config.isp_name && brandNameEl) {
                 brandNameEl.textContent = config.isp_name;
             }
 
             if (config.isp_name) {
                 document.title = `Connect | ${config.isp_name} Wi-Fi`;
+                const welcomeTitleEl = document.getElementById('portalWelcomeTitle');
+                if (welcomeTitleEl) {
+                    welcomeTitleEl.textContent = `Welcome to ${config.isp_name} Wi-Fi`;
+                }
             }
 
             // 4. Custom Welcome Message
@@ -90,8 +115,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 const welcomeMsg = document.getElementById('portalWelcome');
                 if (welcomeMsg) welcomeMsg.textContent = config.brand_welcome;
             }
+
+            // 5. Saved ISP Support Phone
+            if (supportPhone) {
+                const supportBox = document.getElementById('portalSupportBox');
+                const supportLink = document.getElementById('portalSupportLink');
+                const supportPhoneEl = document.getElementById('portalSupportPhone');
+                if (supportPhoneEl) supportPhoneEl.textContent = supportPhone;
+                if (supportLink) supportLink.href = `tel:${supportPhone.replace(/[^+\d]/g, '')}`;
+                if (supportBox) supportBox.classList.add('visible');
+            }
+
+            return false;
         } catch (err) {
             console.error("Failed to load dynamic branding:", err);
+            return false;
         }
     }
 
@@ -234,6 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    loadPortalBranding();
-    loadPackages();
+    loadPortalBranding().then((isSuspended) => {
+        if (!isSuspended) loadPackages();
+    });
 });

@@ -145,10 +145,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     y: {
                         border: { display: false },
                         grid: { color: '#F1F5F9' },
+                        suggestedMax: 1000,
                         ticks: {
                             color: '#94A3B8',
                             padding: isCompact ? 8 : 14,
-                            callback: (v) => v === 0 ? 'KSh 0' : 'KSh ' + (v / 1000) + 'k'
+                            callback: (v) => {
+                                if (v === 0) return 'KSh 0';
+                                if (v >= 1000) return 'KSh ' + Number((v / 1000).toFixed(1)) + 'k';
+                                return 'KSh ' + Math.round(v);
+                            }
                         },
                         min: 0
                     }
@@ -327,5 +332,71 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // --- 7. ONBOARDING CHECKLIST LOADER ---
+    async function loadOnboardingChecklist() {
+        const card = document.getElementById('onboardingCard');
+        if (!card || localStorage.getItem('isp_onboarding_dismissed') === 'true') return;
+
+        try {
+            const res = await fetch('https://api.ispconnect.co.ke/api/billing/onboarding-checklist', {
+                headers: { "Authorization": `Bearer ${ispToken}` }
+            });
+            if (!res.ok) return;
+
+            const data = await res.json();
+            if (data.complete) {
+                card.classList.remove('visible');
+                return;
+            }
+
+            const stepKeys = ['mikrotik', 'payhero', 'packages', 'activated'];
+            let doneCount = 0;
+
+            stepKeys.forEach((key, index) => {
+                const el = document.getElementById(`step-${key}`);
+                if (!el) return;
+                const badge = el.querySelector('.step-badge');
+                if (data.steps && data.steps[key]) {
+                    doneCount++;
+                    el.classList.add('done');
+                    if (badge) badge.innerHTML = '<i data-lucide="check" width="14"></i>';
+                } else {
+                    el.classList.remove('done');
+                    if (badge) badge.textContent = String(index + 1);
+                }
+            });
+
+            const pct = Math.round((doneCount / stepKeys.length) * 100);
+            const fillEl = document.getElementById('onboardingProgressFill');
+            const labelEl = document.getElementById('onboardingProgressLabel');
+            if (fillEl) fillEl.style.width = `${pct}%`;
+            if (labelEl) labelEl.textContent = `${doneCount} of ${stepKeys.length} completed`;
+
+            const trialPill = document.getElementById('onboardingTrialPill');
+            const trialText = document.getElementById('onboardingTrialText');
+            const actHint = document.getElementById('step-activated-hint');
+            if (data.is_trial && data.days_left !== null && trialPill && trialText) {
+                trialPill.style.display = 'inline-flex';
+                trialText.textContent = `${data.days_left} day${data.days_left === 1 ? '' : 's'} left in trial`;
+                if (actHint) actHint.textContent = `KES ${Number(data.monthly_fee || 1300).toLocaleString()} after trial`;
+            }
+
+            card.classList.add('visible');
+            lucide.createIcons({ root: card });
+        } catch (err) {
+            console.error('Checklist load error:', err);
+        }
+    }
+
+    const dismissOnboardingBtn = document.getElementById('dismissOnboardingBtn');
+    if (dismissOnboardingBtn) {
+        dismissOnboardingBtn.addEventListener('click', () => {
+            localStorage.setItem('isp_onboarding_dismissed', 'true');
+            const card = document.getElementById('onboardingCard');
+            if (card) card.classList.remove('visible');
+        });
+    }
+
+    loadOnboardingChecklist();
     loadDashboardData('7D');
 });

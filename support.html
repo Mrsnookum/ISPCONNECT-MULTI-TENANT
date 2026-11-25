@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Support Desk | ISPConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="favicon.jpg">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root{--primary:#10B981;--primary-dark:#059669;--primary-soft:#ECFDF5;--dark:#0F172A;--bg:#F4F7FB;--card:#FFFFFF;--text:#0F172A;--muted:#64748B;--border:#E2E8F0;--danger:#EF4444;--warn:#F59E0B;--blue:#2563EB;--shadow:0 6px 20px rgba(15,23,42,0.06);}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif;}
+        html,body{overflow-x:hidden;background:var(--bg);color:var(--text);min-height:100dvh;}
+        button,input,select,textarea{font-family:inherit;}
+        .hidden{display:none !important;}
+
+        /* BUTTONS & BADGES */
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;font-weight:600;font-size:0.86rem;cursor:pointer;border:1.5px solid transparent;transition:all 0.18s;white-space:nowrap;}
+        .btn-primary{background:var(--primary);color:#fff;}
+        .btn-primary:hover{background:var(--primary-dark);}
+        .btn-dark{background:var(--dark);color:#fff;}
+        .btn-blue{background:var(--blue);color:#fff;}
+        .btn-danger{background:#FEE2E2;color:#B91C1C;border-color:#FECACA;}
+        .btn-outline{background:#fff;border-color:var(--border);color:var(--text);}
+        .btn-outline:hover{border-color:var(--primary);color:var(--primary-dark);}
+        .btn-sm{padding:7px 11px;font-size:0.78rem;border-radius:8px;}
+        .btn:disabled{opacity:0.6;cursor:not-allowed;}
+
+        .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:0.72rem;font-weight:700;text-transform:capitalize;}
+        .b-green{background:#D1FAE5;color:#065F46;}
+        .b-blue{background:#DBEAFE;color:#1E40AF;}
+        .b-amber{background:#FEF3C7;color:#92400E;}
+        .b-purple{background:#F3E8FF;color:#6B21A8;}
+        .b-red{background:#FEE2E2;color:#B91C1C;}
+        .b-gray{background:#F1F5F9;color:#475569;}
+
+        /* LOGIN VIEW */
+        .auth-wrap{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 80% 10%,rgba(16,185,129,0.14),transparent 42%),var(--bg);}
+        .auth-card{width:100%;max-width:410px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:32px 24px;box-shadow:var(--shadow);}
+        .brand-row{display:flex;align-items:center;gap:9px;font-size:1.22rem;font-weight:800;margin-bottom:6px;}
+        .brand-dot{width:34px;height:34px;border-radius:9px;background:var(--primary-soft);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;}
+        .auth-sub{color:var(--muted);font-size:0.86rem;margin-bottom:22px;}
+
+        /* FORMS (16px prevents mobile browser zoom) */
+        .fg{margin-bottom:14px;}
+        .fg label{display:block;font-size:0.8rem;font-weight:600;margin-bottom:6px;color:#334155;}
+        .fg input,.fg select,.fg textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;background:#F8FAFC;color:var(--text);}
+        .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(16,185,129,0.12);}
+
+        /* SHELL */
+        .app-shell{display:grid;grid-template-columns:248px 1fr;min-height:100dvh;}
+        .sidebar{background:var(--dark);color:#CBD5E1;padding:20px 14px;display:flex;flex-direction:column;gap:16px;position:sticky;top:0;height:100dvh;}
+        .side-brand{color:#fff;font-size:1.12rem;font-weight:800;display:flex;align-items:center;gap:8px;padding:0 8px;}
+        .side-brand span{font-size:0.66rem;background:rgba(16,185,129,0.2);color:#34D399;padding:2px 8px;border-radius:99px;font-weight:700;}
+        .side-nav{display:flex;flex-direction:column;gap:5px;flex:1;}
+        .nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:none;background:transparent;color:#94A3B8;font-size:0.88rem;font-weight:600;cursor:pointer;text-align:left;transition:all 0.18s;}
+        .nav-btn:hover{background:rgba(255,255,255,0.06);color:#fff;}
+        .nav-btn.active{background:var(--primary);color:#fff;}
+        .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:99px;display:none;}
+        .nav-badge.show{display:inline-flex;}
+        .duty-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:99px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all 0.2s;}
+        .duty-on{background:#D1FAE5;color:#065F46;border-color:#A7F3D0;}
+        .duty-off{background:#F1F5F9;color:#475569;border-color:#CBD5E1;}
+        .duty-dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+        .agent-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;font-size:0.8rem;}
+        .agent-chip strong{display:block;color:#fff;font-size:0.86rem;}
+        .agent-chip small{color:#94A3B8;display:block;margin:2px 0 10px;}
+
+        /* STICKY MOBILE HEADER */
+        .mobile-header{display:none;position:sticky;top:0;z-index:80;background:#fff;border-bottom:1px solid var(--border);padding:10px 14px;align-items:center;justify-content:space-between;gap:8px;}
+        .mob-brand{display:flex;align-items:center;gap:7px;font-weight:800;font-size:0.98rem;}
+
+        /* MAIN */
+        .main{padding:24px 24px 96px;max-width:1120px;width:100%;min-width:0;}
+        .topbar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+        .topbar h1{font-size:clamp(1.25rem,2.6vw,1.5rem);font-weight:800;letter-spacing:-0.02em;}
+        .topbar p{font-size:0.84rem;color:var(--muted);margin-top:2px;}
+
+        /* KPI CARDS */
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px;}
+        .kpi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px;box-shadow:var(--shadow);}
+        .kpi span{font-size:0.74rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;}
+        .kpi strong{font-size:clamp(1.1rem,2.2vw,1.4rem);font-weight:800;letter-spacing:-0.02em;}
+
+        /* CARD LISTS (100% RESPONSIVE ON ALL SCREENS) */
+        .panel{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:18px;}
+        .panel-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+        .panel-head h2{font-size:1rem;font-weight:700;}
+        .filter-row{display:flex;gap:6px;flex-wrap:wrap;}
+        .pill{padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:#fff;font-size:0.76rem;font-weight:600;color:var(--muted);cursor:pointer;}
+        .pill.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+        .item-list{display:flex;flex-direction:column;gap:12px;}
+        .item-card{border:1px solid var(--border);border-radius:14px;padding:15px;background:#FAFCFF;display:flex;flex-direction:column;gap:10px;transition:border-color 0.18s;}
+        .item-card.urgent{border-color:#FCA5A5;background:#FFF5F5;}
+        .item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+        .item-title{font-weight:700;font-size:0.94rem;color:var(--text);}
+        .item-meta{font-size:0.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:3px;}
+        .item-body{font-size:0.86rem;color:#334155;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+        .item-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-top:8px;border-top:1px dashed var(--border);}
+
+        /* 4-STEP TRIAL HEALTH PILLS */
+        .health-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px;}
+        .h-step{padding:7px 8px;border-radius:8px;font-size:0.72rem;font-weight:700;display:flex;align-items:center;gap:5px;border:1px solid var(--border);background:#F8FAFC;color:var(--muted);}
+        .h-step.ok{background:#ECFDF5;border-color:#A7F3D0;color:#065F46;}
+
+        /* SEARCH BAR */
+        .search-bar{display:flex;gap:8px;flex-wrap:wrap;}
+        .search-bar input{flex:1;min-width:200px;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;}
+        .search-bar input:focus{outline:none;border-color:var(--primary);}
+
+        /* PLAYBOOK CARDS */
+        .qr-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;background:#F8FAFC;}
+        .qr-card h4{font-size:0.88rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+        .qr-card p{font-size:0.82rem;color:#475569;line-height:1.55;}
+
+        /* MODALS & TOAST */
+        .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;opacity:0;visibility:hidden;transition:all 0.2s;}
+        .modal-overlay.active{opacity:1;visibility:visible;}
+        .modal-box{background:#fff;width:100%;max-width:460px;border-radius:16px;padding:22px;box-shadow:0 24px 50px rgba(0,0,0,0.28);max-height:90dvh;overflow-y:auto;}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+        .modal-head h3{font-size:1.08rem;font-weight:800;}
+        .modal-x{border:none;background:#F1F5F9;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;}
+
+        .toast{position:fixed;bottom:84px;right:16px;z-index:1100;background:var(--dark);color:#fff;padding:12px 16px;border-radius:10px;font-size:0.84rem;font-weight:600;box-shadow:0 12px 28px rgba(0,0,0,0.22);transform:translateY(140%);opacity:0;transition:all 0.25s;max-width:calc(100vw - 32px);}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast.err{background:#DC2626;} .toast.ok{background:#059669;}
+
+        /* MOBILE BOTTOM BAR WITH LUCIDE ICONS */
+        .mobile-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:90;padding:6px 4px calc(6px + env(safe-area-inset-bottom));grid-template-columns:repeat(5,1fr);gap:2px;box-shadow:0 -4px 16px rgba(15,23,42,0.06);}
+        .mobile-bar button{position:relative;border:none;background:none;padding:6px 2px;font-size:0.68rem;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border-radius:8px;}
+        .mobile-bar button.active{color:var(--primary-dark);background:var(--primary-soft);}
+        .mob-dot{position:absolute;top:2px;right:14%;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--danger);color:#fff;font-size:0.62rem;font-weight:800;display:none;align-items:center;justify-content:center;}
+        .mob-dot.show{display:inline-flex;}
+
+        @media (max-width:960px){
+            .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+            .health-steps{grid-template-columns:repeat(2,minmax(0,1fr));}
+        }
+        @media (max-width:800px){
+            .app-shell{grid-template-columns:1fr;}
+            .sidebar{display:none;}
+            .mobile-header{display:flex;}
+            .mobile-bar{display:grid;}
+            .main{padding:16px 14px 96px;}
+            .panel{padding:14px;}
+            .topbar{margin-bottom:14px;}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div class="auth-wrap" id="authView">
+        <div class="auth-card">
+            <div class="brand-row">
+                <div class="brand-dot"><i data-lucide="headset" width="20"></i></div>
+                ISPConnect Support
+            </div>
+            <p class="auth-sub">Sign in with your support credentials. Sessions auto-lock after 10 minutes of inactivity.</p>
+            <form id="loginForm">
+                <div class="fg">
+                    <label for="loginEmail">Agent Email</label>
+                    <input type="email" id="loginEmail" placeholder="agent@ispconnect.co.ke" required>
+                </div>
+                <div class="fg">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="loginBtn" style="width:100%;padding:12px;">
+                    <i data-lucide="log-in" width="16"></i> Sign In &amp; Go Online
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SHELL -->
+    <div class="app-shell hidden" id="appView">
+        <!-- DESKTOP SIDEBAR -->
+        <aside class="sidebar">
+            <div class="side-brand">
+                <i data-lucide="wifi" width="19" color="#10B981"></i>
+                ISPConnect <span>SUPPORT</span>
+            </div>
+            <nav class="side-nav">
+                <button class="nav-btn active" data-tab="inbox">
+                    <i data-lucide="mail" width="17"></i> Inbox
+                    <span class="nav-badge" id="sideInboxBadge">0</span>
+                </button>
+                <button class="nav-btn" data-tab="alerts">
+                    <i data-lucide="bell-ring" width="17"></i> Live Alerts
+                    <span class="nav-badge" id="sideAlertsBadge">0</span>
+                </button>
+                <button class="nav-btn" data-tab="leads">
+                    <i data-lucide="users" width="17"></i> Leads Pipeline
+                </button>
+                <button class="nav-btn" data-tab="diagnostics">
+                    <i data-lucide="search" width="17"></i> Diagnostics
+                </button>
+                <button class="nav-btn" data-tab="more">
+                    <i data-lucide="wallet" width="17"></i> Earnings &amp; Guide
+                </button>
+            </nav>
+            <div class="agent-chip">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <strong id="sideAgentName">Agent</strong>
+                    <button type="button" class="duty-pill duty-on" id="sideDutyBtn"><span class="duty-dot"></span> Online</button>
+                </div>
+                <small id="sideAgentMeta">Served today: 0 · Ref: —</small>
+                <button class="btn btn-outline btn-sm" id="logoutBtn" style="width:100%;">
+                    <i data-lucide="log-out" width="14"></i> Log Out
+                </button>
+            </div>
+        </aside>
+
+        <div style="min-width:0;display:flex;flex-direction:column;">
+            <!-- MOBILE STICKY HEADER -->
+            <header class="mobile-header">
+                <div class="mob-brand"><i data-lucide="wifi" width="18" color="#10B981"></i> Support Desk</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button type="button" class="duty-pill duty-on" id="mobDutyBtn"><span class="duty-dot"></span> Online</button>
+                    <button type="button" class="btn btn-outline btn-sm" id="mobLogoutBtn" aria-label="Logout"><i data-lucide="log-out" width="15"></i></button>
+                </div>
+            </header>
+
+            <main class="main">
+                <!-- TAB 1: UNIFIED INBOX -->
+                <section id="tab-inbox">
+                    <div class="topbar">
+                        <div>
+                            <h1>Unified Support Inbox</h1>
+                            <p>Website Contact Form, Enterprise Quotes &amp; support@ispconnect.co.ke emails.</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="refreshInboxBtn"><i data-lucide="refresh-cw" width="14"></i> Refresh</button>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h2>Incoming Messages</h2>
+                            <div class="filter-row" id="inboxFilters">
+                                <button class="pill active" data-inq-status="">All</button>
+                                <button class="pill" data-inq-status="open">Unclaimed</button>
+                                <button class="pill" data-inq-status="claimed">Claimed</button>
+                                <button class="pill" data-inq-status="resolved">Resolved</button>
+                            </div>
+                        </div>
+                        <div class="item-list" id="inboxList"></div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: LIVE ISP FAILURE ALERTS -->
+                <section id="tab-alerts" class="hidden">
+                    <div class="topbar">
+                        <div>
+                            <h1>Live ISP Failure Alerts</h1>
+                            <p>Critical wallet empty, provisioning, and router outage alerts pinged in real time.</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="refreshAlertsBtn"><i data-lucide="refresh-cw" width="14"></i> Refresh</button>
+                    </div>
+                    <div class="panel">
+                        <div class="item-list" id="incidentsList"></div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: LEADS PIPELINE -->
+                <section id="tab-leads" class="hidden">
+                    <div class="topbar">
+                        <div>
+                            <h1>ISP Onboarding Pipeline</h1>
+                            <p>Track prospects from first chat to paid KES 1,300/mo conversion.</p>
+                        </div>
+                        <button class="btn btn-primary" id="openLeadModalBtn"><i data-lucide="plus" width="15"></i> Log Lead</button>
+                    </div>
+
+                    <div class="kpi-grid">
+                        <div class="kpi"><span>Total Leads</span><strong id="kpiTotalLeads">0</strong></div>
+                        <div class="kpi"><span>In Trial / Setup</span><strong id="kpiActiveTrials">0</strong></div>
+                        <div class="kpi"><span>Converted ISPs</span><strong id="kpiConverted">0</strong></div>
+                        <div class="kpi"><span>Served Today</span><strong id="kpiServedToday">0</strong></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h2>My Leads</h2>
+                            <div class="filter-row" id="stageFilters">
+                                <button class="pill active" data-stage="">All</button>
+                                <button class="pill" data-stage="new">New</button>
+                                <button class="pill" data-stage="trial">Trial</button>
+                                <button class="pill" data-stage="mikrotik_connected">MikroTik</button>
+                                <button class="pill" data-stage="converted">Converted</button>
+                            </div>
+                        </div>
+                        <div class="item-list" id="leadsList"></div>
+                    </div>
+                </section>
+
+                <!-- TAB 4: DIAGNOSTICS -->
+                <section id="tab-diagnostics" class="hidden">
+                    <div class="topbar">
+                        <div>
+                            <h1>Live Diagnostics (Read-Only)</h1>
+                            <p>Verify M-Pesa receipts, inspect 4-step ISP trial health, and resend voucher SMS.</p>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <form id="diagSearchForm" class="search-bar">
+                            <input type="text" id="diagQuery" placeholder="Phone (07...), M-Pesa receipt, voucher, or ISP name..." required>
+                            <button type="submit" class="btn btn-primary" id="diagSearchBtn"><i data-lucide="search" width="15"></i> Search</button>
+                        </form>
+                        <div id="diagResults" class="hidden" style="margin-top:18px;display:flex;flex-direction:column;gap:18px;">
+                            <div>
+                                <h3 style="font-size:0.92rem;margin-bottom:10px;">ISP Health &amp; Routers</h3>
+                                <div class="item-list" id="diagTenantsList"></div>
+                            </div>
+                            <div>
+                                <h3 style="font-size:0.92rem;margin-bottom:10px;">M-Pesa Payments &amp; Vouchers</h3>
+                                <div class="item-list" id="diagPaymentsList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 5: EARNINGS, PLAYBOOK & SECURITY -->
+                <section id="tab-more" class="hidden">
+                    <div class="topbar">
+                        <div>
+                            <h1>Commissions, Playbook &amp; Security</h1>
+                            <p>Your Referral Code: <strong id="moreRefCode">—</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="kpi-grid">
+                        <div class="kpi"><span>Pending Verification</span><strong id="comPending">KES 0</strong></div>
+                        <div class="kpi"><span>Earned (Last 7d)</span><strong id="comWeek">KES 0</strong></div>
+                        <div class="kpi"><span>Total Paid Out</span><strong id="comPaid">KES 0</strong></div>
+                        <div class="kpi"><span>Active Trials</span><strong id="comTrials">0</strong></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head"><h2>Commission Ledger</h2></div>
+                        <div class="item-list" id="commissionsList"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head"><h2>Quick Replies &amp; Troubleshooting</h2></div>
+                        <div class="qr-card">
+                            <h4>1. Trial &amp; Pricing Pitch <button class="btn btn-outline btn-sm copy-qr" data-text="Hi! ISPConnect automates your MikroTik Wi-Fi hotspot with M-Pesa STK Push straight to your Till/Paybill, instant SMS vouchers & speed caps — works behind Starlink & Faiba (no public IP needed). Try FREE for 14 days (KES 1,300/mo after) or get full Enterprise ownership: https://ispconnect.co.ke">Copy</button></h4>
+                            <p>Hi! ISPConnect automates your MikroTik Wi-Fi hotspot with M-Pesa STK Push straight to your Till/Paybill, instant SMS vouchers &amp; speed caps — works behind Starlink &amp; Faiba (no public IP needed). Try FREE for 14 days (KES 1,300/mo after) or get full Enterprise ownership: https://ispconnect.co.ke</p>
+                        </div>
+                        <div class="qr-card">
+                            <h4>2. Paid M-Pesa But No Internet? (Guide)</h4>
+                            <p>1) Search their phone/receipt in <strong>Diagnostics</strong>. 2) If status is <em>completed</em>, tap <strong>Resend SMS</strong> so they can type the voucher code on the portal. 3) If status is still <em>pending</em> after 2 mins, check that the ISP's PayHero channel &amp; Payment Wallet are funded, or click <strong>Escalate</strong>.</p>
+                        </div>
+                        <div class="qr-card">
+                            <h4>3. iPhone Captive Portal Not Popping Up?</h4>
+                            <p>Ask the customer to open Safari and visit <code>http://neverssl.com</code> or forget and rejoin the Wi-Fi network with "Auto-Login" turned ON.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="max-width:460px;">
+                        <div class="panel-head"><h2>Change Your Password</h2></div>
+                        <form id="changePwForm">
+                            <div class="fg"><label>Current Password</label><input type="password" id="curPw" required></div>
+                            <div class="fg"><label>New Password (min 6 chars)</label><input type="password" id="newPw" minlength="6" required></div>
+                            <button type="submit" class="btn btn-dark">Update Password</button>
+                        </form>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- MOBILE BOTTOM BAR WITH LUCIDE ICONS -->
+        <nav class="mobile-bar">
+            <button class="active" data-tab="inbox">
+                <i data-lucide="mail" width="19"></i>
+                <span>Inbox</span>
+                <span class="mob-dot" id="mobInboxBadge">0</span>
+            </button>
+            <button data-tab="alerts">
+                <i data-lucide="bell-ring" width="19"></i>
+                <span>Alerts</span>
+                <span class="mob-dot" id="mobAlertsBadge">0</span>
+            </button>
+            <button data-tab="leads">
+                <i data-lucide="users" width="19"></i>
+                <span>Leads</span>
+            </button>
+            <button data-tab="diagnostics">
+                <i data-lucide="search" width="19"></i>
+                <span>Check</span>
+            </button>
+            <button data-tab="more">
+                <i data-lucide="wallet" width="19"></i>
+                <span>More</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL: REPLY TO INQUIRY / EMAIL -->
+    <div class="modal-overlay" id="replyModal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>Reply to Inquiry</h3>
+                <button type="button" class="modal-x" data-close-modal>&times;</button>
+            </div>
+            <div id="replyMeta" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;"></div>
+            <form id="replyForm">
+                <input type="hidden" id="replyInqId">
+                <div class="fg">
+                    <label>Your Reply</label>
+                    <textarea id="replyText" rows="4" placeholder="Write a helpful reply..." required></textarea>
+                </div>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;margin-bottom:14px;" id="sendEmailCheckWrap">
+                    <input type="checkbox" id="replySendEmail" checked> Send email via support@ispconnect.co.ke
+                </label>
+                <button type="submit" class="btn btn-primary" id="replySubmitBtn" style="width:100%;">Send Reply &amp; Mark Resolved</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: LOG NEW LEAD -->
+    <div class="modal-overlay" id="leadModal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>Log New ISP Lead</h3>
+                <button type="button" class="modal-x" data-close-modal>&times;</button>
+            </div>
+            <form id="leadForm">
+                <div class="fg"><label>ISP / Hotspot Name</label><input type="text" id="leadIsp" placeholder="e.g. RiftNet Wi-Fi" required></div>
+                <div class="fg"><label>Owner Name</label><input type="text" id="leadContact" placeholder="e.g. Kevin Kip" required></div>
+                <div class="fg"><label>Phone / WhatsApp</label><input type="tel" id="leadPhone" placeholder="07XXXXXXXX" required></div>
+                <div class="fg"><label>Town / Location</label><input type="text" id="leadLoc" placeholder="e.g. Nakuru"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div class="fg"><label>Routers</label><input type="number" id="leadRouters" value="1" min="1"></div>
+                    <div class="fg">
+                        <label>Lead Source</label>
+                        <select id="leadSource">
+                            <option value="direct">My Own Hustle</option>
+                            <option value="ad_lead">Company Ad Lead</option>
+                            <option value="website">Website Form</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="fg">
+                    <label>Plan Interest</label>
+                    <select id="leadPlan">
+                        <option value="cloud">Cloud (KES 1,300/mo)</option>
+                        <option value="enterprise">Enterprise (Custom)</option>
+                    </select>
+                </div>
+                <div class="fg"><label>Notes</label><textarea id="leadNotes" rows="2" placeholder="Router model, follow-up time..."></textarea></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Lead</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ESCALATE TO ADMIN -->
+    <div class="modal-overlay" id="escalateModal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>Escalate to Admin (God Mode)</h3>
+                <button type="button" class="modal-x" data-close-modal>&times;</button>
+            </div>
+            <form id="escalateForm">
+                <input type="hidden" id="escIncId">
+                <div class="fg">
+                    <label>What did you check &amp; why does Admin need to step in?</label>
+                    <textarea id="escNote" rows="3" placeholder="e.g. Verified PayHero receipt, wallet funded, but MikroTik firewall blocks port 1812." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger" style="width:100%;">Flag for Admin</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: 10-MINUTE INACTIVITY WARNING (60s COUNTDOWN) -->
+    <div class="modal-overlay" id="idleModal">
+        <div class="modal-box" style="text-align:center;">
+            <div style="width:52px;height:52px;border-radius:50%;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                <i data-lucide="clock-alert" width="26"></i>
+            </div>
+            <h3 style="margin-bottom:6px;">Are you still there?</h3>
+            <p style="font-size:0.86rem;color:var(--muted);margin-bottom:18px;">
+                No activity detected for 9 minutes. You will be automatically logged out and set Offline in <strong id="idleCountdown" style="color:#DC2626;">60</strong>s.
+            </p>
+            <button type="button" class="btn btn-primary" id="stayOnlineBtn" style="width:100%;">I'm Still Working — Stay Online</button>
+        </div>
+    </div>
+
+    <!-- MODAL: FIRST-LOGIN PASSWORD CHANGE -->
+    <div class="modal-overlay" id="forcePwModal">
+        <div class="modal-box">
+            <div class="modal-head"><h3>Set Your Personal Password</h3></div>
+            <p style="font-size:0.84rem;color:var(--muted);margin-bottom:14px;">Set your private password before starting your shift.</p>
+            <form id="forcePwForm">
+                <div class="fg"><label>Temporary Password</label><input type="password" id="forceCurPw" required></div>
+                <div class="fg"><label>New Password (min 6 chars)</label><input type="password" id="forceNewPw" minlength="6" required></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save &amp; Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script src="support.js"></script>
+</body>
+</html>

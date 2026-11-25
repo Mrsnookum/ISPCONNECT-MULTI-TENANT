@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | ISPConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="favicon.jpg">
+    <style>
+        :root{--primary:#10B981;--primary-dark:#059669;--bg:#F8FAFC;--card:#FFFFFF;--text:#0F172A;--muted:#475569;--border:#E2E8F0;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+        body{background:var(--bg);color:var(--text);line-height:1.7;}
+        a{color:var(--primary-dark);text-decoration:none;font-weight:600;} a:hover{text-decoration:underline;}
+        header{background:#fff;border-bottom:1px solid var(--border);padding:16px 20px;position:sticky;top:0;z-index:20;}
+        .nav{max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+        .logo{font-size:1.25rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;}
+        .logo svg{color:var(--primary);}
+        .back-link{font-size:0.88rem;color:var(--muted);} .back-link:hover{color:var(--primary-dark);}
+        main{max-width:900px;margin:36px auto 64px;padding:0 20px;}
+        .doc-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:clamp(24px,4vw,48px);box-shadow:0 10px 25px rgba(15,23,42,0.05);}
+        .doc-meta{font-size:0.82rem;color:var(--muted);margin-bottom:24px;display:inline-block;background:#ECFDF5;color:#065F46;padding:4px 12px;border-radius:99px;font-weight:600;}
+        h1{font-size:clamp(1.75rem,3vw,2.35rem);font-weight:800;margin-bottom:10px;letter-spacing:-0.025em;}
+        h2{font-size:1.15rem;font-weight:700;margin:28px 0 10px;color:var(--text);}
+        p,li{color:var(--muted);font-size:0.95rem;margin-bottom:10px;}
+        ul{padding-left:20px;margin-bottom:14px;}
+        footer{text-align:center;padding:24px 20px 40px;font-size:0.85rem;color:var(--muted);}
+        .footer-nav{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:10px;}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav">
+            <a href="index.html" class="logo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                ISPConnect
+            </a>
+            <a href="index.html" class="back-link">&larr; Back to Home</a>
+        </div>
+    </header>
+    <main>
+        <article class="doc-card">
+            <span class="doc-meta">Effective Date: November 2026</span>
+            <h1>Terms of Service</h1>
+            <p>By registering for or using <strong>ISPConnect</strong> (Cloud or Enterprise Edition), you agree to these Terms of Service. If you are using the platform on behalf of an ISP or business, you confirm that you have authority to bind that organization.</p>
+
+            <h2>1. Services Provided</h2>
+            <ul>
+                <li><strong>ISPConnect Cloud:</strong> A managed, multi-tenant Wi-Fi hotspot billing platform including cloud FreeRADIUS authentication, captive portal hosting, M-Pesa automation, SMS voucher dispatch, and analytics dashboards.</li>
+                <li><strong>Enterprise Edition:</strong> A dedicated single-ISP installation licensed for full ownership on the client's own infrastructure. Enterprise clients are solely responsible for procuring, paying for, and maintaining their own VPS/servers, hosting, domain names, SSL certificates, M-Pesa/PayHero accounts, and SMS credits.</li>
+            </ul>
+
+            <h2>2. Billing, Free Trial & Account Suspension (Cloud)</h2>
+            <ul>
+                <li>New Cloud accounts receive a <strong>14-day free trial</strong> to test the system before committing to a paid subscription.</li>
+                <li>Continued Cloud access requires an active monthly subscription (KES 1,300/month) and sufficient balances in your Payment Wallet and SMS Wallet for automated transaction fees and SMS delivery.</li>
+                <li>If a trial or monthly subscription expires without renewal, hotspot portal authentication and new customer payments may be automatically suspended until the account is renewed.</li>
+            </ul>
+
+            <h2>3. ISP Responsibilities</h2>
+            <ul>
+                <li>You are responsible for your own internet uplink, MikroTik hardware, local network legality, and compliance with Communications Authority of Kenya (CAK) regulations where applicable.</li>
+                <li>You are responsible for keeping your PayHero/M-Pesa API credentials and admin passwords confidential.</li>
+                <li>You are solely responsible for customer support, Wi-Fi uptime, and service quality delivered to your hotspot end-users.</li>
+            </ul>
+
+            <h2>4. Acceptable Use</h2>
+            <p>You agree not to use ISPConnect for unlawful activities, unauthorized network interception, spam, or attempts to bypass billing, rate limits, or security controls. We reserve the right to suspend accounts that abuse the platform.</p>
+
+            <h2>5. Limitation of Liability</h2>
+            <p>ISPConnect is provided on an "as-is" and "as-available" basis. While we strive for high uptime, we are not liable for revenue losses caused by Safaricom M-Pesa/PayHero outages, upstream internet failures, power blackouts, or misconfigured MikroTik hardware.</p>
+
+            <h2>6. Contact</h2>
+            <p>Questions about these terms can be sent to <a href="mailto:support@ispconnect.co.ke">support@ispconnect.co.ke</a> or <a href="tel:+254712153539">+254 712 153 539</a>.</p>
+        </article>
+    </main>
+    <footer>
+        <div class="footer-nav">
+            <a href="index.html">Home</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="refund.html">Refund Policy</a>
+        </div>
+        &copy; 2026 ISPConnect Kenya. All rights reserved.
+    </footer>
+</body>
+</html>

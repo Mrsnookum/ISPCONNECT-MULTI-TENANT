@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | ISPConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="favicon.jpg">
+    <style>
+        :root{--primary:#10B981;--primary-dark:#059669;--bg:#F8FAFC;--card:#FFFFFF;--text:#0F172A;--muted:#475569;--border:#E2E8F0;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+        body{background:var(--bg);color:var(--text);line-height:1.7;}
+        a{color:var(--primary-dark);text-decoration:none;font-weight:600;} a:hover{text-decoration:underline;}
+        header{background:#fff;border-bottom:1px solid var(--border);padding:16px 20px;position:sticky;top:0;z-index:20;}
+        .nav{max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+        .logo{font-size:1.25rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;}
+        .logo svg{color:var(--primary);}
+        .back-link{font-size:0.88rem;color:var(--muted);} .back-link:hover{color:var(--primary-dark);}
+        main{max-width:900px;margin:36px auto 64px;padding:0 20px;}
+        .doc-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:clamp(24px,4vw,48px);box-shadow:0 10px 25px rgba(15,23,42,0.05);}
+        .doc-meta{font-size:0.82rem;color:var(--muted);margin-bottom:24px;display:inline-block;background:#ECFDF5;color:#065F46;padding:4px 12px;border-radius:99px;font-weight:600;}
+        h1{font-size:clamp(1.75rem,3vw,2.35rem);font-weight:800;margin-bottom:10px;letter-spacing:-0.025em;}
+        h2{font-size:1.15rem;font-weight:700;margin:28px 0 10px;color:var(--text);}
+        p,li{color:var(--muted);font-size:0.95rem;margin-bottom:10px;}
+        ul{padding-left:20px;margin-bottom:14px;}
+        footer{text-align:center;padding:24px 20px 40px;font-size:0.85rem;color:var(--muted);}
+        .footer-nav{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:10px;}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav">
+            <a href="index.html" class="logo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                ISPConnect
+            </a>
+            <a href="index.html" class="back-link">&larr; Back to Home</a>
+        </div>
+    </header>
+    <main>
+        <article class="doc-card">
+            <span class="doc-meta">Effective Date: November 2026</span>
+            <h1>Privacy Policy</h1>
+            <p>ISPConnect ("we", "our", or "us") respects your privacy and is committed to protecting personal data in accordance with the <strong>Kenya Data Protection Act, 2019</strong>. This policy explains how we collect, use, and safeguard data across our SaaS platform and captive portals.</p>
+
+            <h2>1. Information We Collect</h2>
+            <ul>
+                <li><strong>ISP Account Holders (Tenants):</strong> Business name, contact email, support phone number, MikroTik router identifiers, payment gateway configuration (e.g., PayHero channel IDs), and billing/wallet history.</li>
+                <li><strong>Hotspot End-Users:</strong> Mobile phone numbers used for M-Pesa STK Push and SMS voucher delivery, device MAC addresses, local IP addresses, M-Pesa transaction receipts, and active session timestamps.</li>
+            </ul>
+
+            <h2>2. How We Use Your Information</h2>
+            <ul>
+                <li>To authenticate Wi-Fi hotspot sessions via FreeRADIUS and MikroTik routers.</li>
+                <li>To verify M-Pesa payments, generate access vouchers, and send transactional SMS notifications.</li>
+                <li>To provide ISPs with real-time analytics, revenue reporting, router heartbeat monitoring, and technical support.</li>
+                <li>To prevent fraud, unauthorized voucher sharing, and abuse of network resources.</li>
+            </ul>
+
+            <h2>3. Data Sharing & Third-Party Services</h2>
+            <p>We do not sell personal data. We share only the minimum data necessary with trusted infrastructure and payment partners strictly to deliver the service, including M-Pesa/PayHero payment processors, SMS gateways, and cloud database/hosting providers.</p>
+
+            <h2>4. Data Security & Retention</h2>
+            <p>We use encrypted HTTPS connections, role-based access controls, and secure database storage to protect account and session records. Session and transaction logs are retained only as long as required for billing reconciliation, customer reconnection, and statutory compliance.</p>
+
+            <h2>5. Your Rights</h2>
+            <p>Under the Kenya Data Protection Act, 2019, you have the right to request access to, correction of, or deletion of your personal data, subject to legal and financial record-keeping obligations. Hotspot end-users should first contact their local Wi-Fi provider (ISP), or reach us directly.</p>
+
+            <h2>6. Contact Us</h2>
+            <p>For privacy inquiries or data requests, contact us at <a href="mailto:support@ispconnect.co.ke">support@ispconnect.co.ke</a> or call/WhatsApp <a href="tel:+254712153539">+254 712 153 539</a>.</p>
+        </article>
+    </main>
+    <footer>
+        <div class="footer-nav">
+            <a href="index.html">Home</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="refund.html">Refund Policy</a>
+        </div>
+        &copy; 2026 ISPConnect Kenya. All rights reserved.
+    </footer>
+</body>
+</html>

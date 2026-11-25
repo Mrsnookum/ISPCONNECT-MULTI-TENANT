@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const API_GM = "https://api.ispconnect.co.ke/api/godmode";
+    const API_SUPPORT_ADMIN = "https://api.ispconnect.co.ke/api/support/admin";
     const IDLE_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
 
     let gmToken = localStorage.getItem("godmode_token") || "";
@@ -14,6 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let cachedLedger = [];
     let cachedRouters = [];
     let cachedAudit = [];
+    let cachedSupportAgents = [];
+    let cachedSupportComms = [];
+    let cachedSupportAudit = [];
+    let cachedSupportSessions = [];
+    let cachedSupportIncidents = [];
 
     const charts = {};
     let idleTimer = null;
@@ -49,6 +55,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return d.toLocaleString("en-KE", {
             month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
         });
+    }
+
+    function fmtDuration(secs) {
+        const s = Math.max(0, Number(secs || 0));
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
     }
 
     function showToast(msg, type = "success") {
@@ -122,6 +135,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.detail || "Request failed");
+        return data;
+    }
+
+    async function supportAdminFetch(path, options = {}) {
+        const res = await fetch(`${API_SUPPORT_ADMIN}${path}`, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                ...(gmToken ? { Authorization: `Bearer ${gmToken}` } : {}),
+                ...(options.headers || {})
+            }
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.detail || "Support admin request failed");
         return data;
     }
 
@@ -222,6 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (viewName === "routers" && !cachedRouters.length) loadRouters();
         if (viewName === "audit" && !cachedAudit.length) loadAuditLogs();
         if (viewName === "broadcast") updateBroadcastPreview();
+        if (viewName === "support") loadSupportTeam();
     }
 
     document.querySelectorAll(".nav-btn[data-view], .mob-nav-btn[data-view]").forEach(btn => {
@@ -252,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
     async function refreshEverything() {
         try {
-            await Promise.all([loadOverview(), loadTenants(), loadLedger(), loadRouters(), loadAuditLogs()]);
+            await Promise.all([loadOverview(), loadTenants(), loadLedger(), loadRouters(), loadAuditLogs(), loadSupportTeam()]);
         } catch (err) {
             if (err.message !== "Unauthorized") showToast(err.message, "error");
         }
@@ -1048,4 +1076,244 @@ document.addEventListener("DOMContentLoaded", () => {
             </tr>
         `).join("") : `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">No audit logs yet.</td></tr>`;
     }
+
+    // =========================================================
+    // 8. SUPPORT TEAM MANAGEMENT (PRESENCE, SESSIONS & COMMISSIONS)
+    // =========================================================
+    async function loadSupportTeam() {
+        try {
+            const [agentsRes, logsRes, commsRes, sessRes, incRes] = await Promise.all([
+                supportAdminFetch("/agents"),
+                supportAdminFetch("/audit-logs?limit=80"),
+                supportAdminFetch("/commissions").catch(() => ({ commissions: [] })),
+                supportAdminFetch("/sessions?limit=40").catch(() => ({ sessions: [] })),
+                supportAdminFetch("/incidents?limit=40").catch(() => ({ incidents: [] }))
+            ]);
+            cachedSupportAgents = agentsRes.agents || [];
+            cachedSupportAudit = logsRes.logs || [];
+            cachedSupportComms = commsRes.commissions || [];
+            cachedSupportSessions = sessRes.sessions || [];
+            cachedSupportIncidents = incRes.incidents || [];
+            const cnt = document.getElementById("navSupportCount");
+            if (cnt) cnt.textContent = String(cachedSupportAgents.length);
+            renderSupportTeam();
+        } catch (_) {
+            // Silently ignore on overview load if support_api is not yet mounted
+        }
+    }
+
+    function renderSupportTeam() {
+        const agentMap = Object.fromEntries(cachedSupportAgents.map(a => [a.id, a.full_name]));
+
+        const aBody = document.getElementById("supportAgentsBody");
+        if (aBody) {
+            aBody.innerHTML = cachedSupportAgents.length ? cachedSupportAgents.map(a => `
+                <tr>
+                    <td>
+                        <div class="isp-cell">
+                            <span class="isp-name">${escapeHtml(a.full_name)} <span class="mini-pill pill-blue">${escapeHtml(a.referral_code)}</span></span>
+                            <span class="isp-meta">${escapeHtml(a.email)}${a.phone ? ` · ${escapeHtml(a.phone)}` : ""}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${!a.is_active ? "st-suspended" : a.live_online ? "st-active" : "st-pending"}">
+                            <span class="dot"></span>${!a.is_active ? "Suspended" : a.live_online ? "Online Now" : "Offline"}
+                        </span>
+                    </td>
+                    <td><strong>${fmtDuration(a.online_seconds_today)}</strong></td>
+                    <td><strong>${a.served_today || 0}</strong></td>
+                    <td>
+                        <div class="isp-meta">In: ${fmtDate(a.last_login_at)}</div>
+                        <div class="isp-meta">Out: ${fmtDate(a.last_logout_at)} ${a.last_logout_reason ? `(${escapeHtml(a.last_logout_reason)})` : ""}</div>
+                    </td>
+                    <td>
+                        <div class="action-row">
+                            <button class="btn btn-outline btn-sm" onclick="window.__gmResetAgentPw('${escapeHtml(a.id)}')">Reset PW</button>
+                            <button class="btn ${a.is_active ? "btn-danger" : "btn-emerald"} btn-sm" onclick="window.__gmToggleAgent('${escapeHtml(a.id)}')">
+                                ${a.is_active ? "Suspend" : "Activate"}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No support agents created yet. Click "Add Support Agent" above.</td></tr>`;
+        }
+
+        const sBody = document.getElementById("supportSessionsBody");
+        if (sBody) {
+            sBody.innerHTML = cachedSupportSessions.length ? cachedSupportSessions.map(s => `
+                <tr>
+                    <td><strong>${escapeHtml(s.agent_name)}</strong></td>
+                    <td>${fmtDate(s.login_at)}</td>
+                    <td>${fmtDuration(s.duration_seconds)}</td>
+                    <td><span class="mini-pill ${s.logout_reason === "active" ? "pill-blue" : "pill-amber"}">${escapeHtml(s.logout_reason || "—")}</span></td>
+                </tr>
+            `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No shifts logged yet.</td></tr>`;
+        }
+
+        const iBody = document.getElementById("supportIncidentsBody");
+        if (iBody) {
+            iBody.innerHTML = cachedSupportIncidents.length ? cachedSupportIncidents.map(inc => `
+                <tr>
+                    <td><strong>${escapeHtml(inc.business_name)}</strong><div class="isp-meta">${escapeHtml(inc.message)}</div></td>
+                    <td><span class="status-badge ${inc.status === "resolved" ? "st-active" : "st-suspended"}"><span class="dot"></span>${escapeHtml(inc.status)}</span></td>
+                    <td>
+                        <div class="isp-meta">SMS: ${escapeHtml(inc.sms_sent_to || "—")}</div>
+                        ${inc.escalated_to_admin ? `<div style="color:#F87171;font-size:0.75rem;font-weight:600;">${escapeHtml(inc.escalation_note)}</div>` : ""}
+                    </td>
+                </tr>
+            `).join("") : `<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px;">No failure alerts recorded.</td></tr>`;
+        }
+
+        const cBody = document.getElementById("supportCommsBody");
+        if (cBody) {
+            cBody.innerHTML = cachedSupportComms.length ? cachedSupportComms.map(c => `
+                <tr>
+                    <td>${fmtDate(c.created_at)}</td>
+                    <td><strong>${escapeHtml(agentMap[c.agent_id] || c.agent_id)}</strong></td>
+                    <td><span class="mini-pill pill-blue">${escapeHtml(String(c.commission_type || "").replace("_", " "))}</span></td>
+                    <td style="font-weight:700;color:#10B981;">${fmtKES(c.amount)}</td>
+                    <td><span class="status-badge ${c.status === "paid" ? "st-active" : c.status === "approved" ? "st-trial" : "st-pending"}"><span class="dot"></span>${escapeHtml(c.status)}</span></td>
+                    <td class="isp-meta">${escapeHtml(c.notes || "—")}</td>
+                    <td>${c.status !== "paid" ? `<button class="btn btn-emerald btn-sm" onclick="window.__gmPayComm('${escapeHtml(c.id)}')">Mark Paid</button>` : `<span class="isp-meta">${fmtDate(c.paid_at)}</span>`}</td>
+                </tr>
+            `).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No commission entries recorded yet.</td></tr>`;
+        }
+
+        const lBody = document.getElementById("supportAuditBody");
+        if (lBody) {
+            lBody.innerHTML = cachedSupportAudit.length ? cachedSupportAudit.map(l => `
+                <tr>
+                    <td>${fmtDate(l.created_at)}</td>
+                    <td><strong>${escapeHtml(l.agent_name)}</strong></td>
+                    <td><span class="mini-pill pill-blue">${escapeHtml(l.action)}</span></td>
+                    <td>${escapeHtml(l.target || "—")}</td>
+                    <td class="isp-meta" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(JSON.stringify(l.details || {}))}</td>
+                </tr>
+            `).join("") : `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">No support activity logged yet.</td></tr>`;
+        }
+    }
+
+    document.getElementById("testIncidentBtn")?.addEventListener("click", async () => {
+        try {
+            const res = await supportAdminFetch("/test-incident", { method: "POST", body: JSON.stringify({}) });
+            showToast(`Test alert created! SMS routed to: ${res.incident.sms_sent_to || "logged only"}`);
+            loadSupportTeam();
+        } catch (err) {
+            showToast(err.message, "error");
+        }
+    });
+
+    function showAgentCreds(titleText, email, tempPw) {
+        const box = document.getElementById("agentCredsBox");
+        if (box) {
+            box.textContent = `${titleText}\nLogin URL: https://ispconnect.co.ke/support.html\nEmail: ${email}\nTemporary Password: ${tempPw}\n\n(You will be asked to set your own password on login.)`;
+        }
+        document.getElementById("agentCredsModal")?.classList.add("open");
+    }
+
+    document.getElementById("copyAgentCredsBtn")?.addEventListener("click", async () => {
+        const txt = document.getElementById("agentCredsBox")?.textContent || "";
+        await navigator.clipboard.writeText(txt);
+        showToast("Credentials copied — ready to paste on WhatsApp!");
+    });
+
+    document.getElementById("openCreateAgentBtn")?.addEventListener("click", () => {
+        document.getElementById("createAgentForm")?.reset();
+        document.getElementById("createAgentModal")?.classList.add("open");
+    });
+
+    document.getElementById("createAgentForm")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("caSubmitBtn");
+        btn.disabled = true;
+        try {
+            const res = await supportAdminFetch("/agents", {
+                method: "POST",
+                body: JSON.stringify({
+                    full_name: document.getElementById("caName").value.trim(),
+                    email: document.getElementById("caEmail").value.trim(),
+                    phone: document.getElementById("caPhone").value.trim(),
+                    temp_password: document.getElementById("caTempPw").value.trim() || null
+                })
+            });
+            document.getElementById("createAgentModal").classList.remove("open");
+            showToast(`Support agent ${res.agent.full_name} created!`);
+            showAgentCreds(`Welcome to ISPConnect Support, ${res.agent.full_name}!`, res.agent.email, res.temp_password);
+            await loadSupportTeam();
+        } catch (err) {
+            showToast(err.message, "error");
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    window.__gmToggleAgent = async (agentId) => {
+        try {
+            const res = await supportAdminFetch(`/agents/${agentId}/toggle`, { method: "PATCH" });
+            showToast(res.is_active ? "Agent account reactivated." : "Agent suspended immediately.");
+            await loadSupportTeam();
+        } catch (err) {
+            showToast(err.message, "error");
+        }
+    };
+
+    window.__gmResetAgentPw = async (agentId) => {
+        const agent = cachedSupportAgents.find(a => a.id === agentId);
+        try {
+            const res = await supportAdminFetch(`/agents/${agentId}/reset-password`, {
+                method: "POST",
+                body: JSON.stringify({})
+            });
+            showToast("Temporary password generated.");
+            showAgentCreds(`Password Reset for ${agent ? agent.full_name : "Agent"}`, agent ? agent.email : "", res.temp_password);
+        } catch (err) {
+            showToast(err.message, "error");
+        }
+    };
+
+    document.getElementById("openAwardCommBtn")?.addEventListener("click", () => {
+        const sel = document.getElementById("acAgentId");
+        if (!cachedSupportAgents.length) {
+            showToast("Create a support agent first.", "error");
+            return;
+        }
+        sel.innerHTML = cachedSupportAgents.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.full_name)} (${escapeHtml(a.referral_code)})</option>`).join("");
+        document.getElementById("awardCommForm")?.reset();
+        document.getElementById("awardCommModal")?.classList.add("open");
+    });
+
+    document.getElementById("awardCommForm")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("acSubmitBtn");
+        btn.disabled = true;
+        try {
+            await supportAdminFetch("/commissions", {
+                method: "POST",
+                body: JSON.stringify({
+                    agent_id: document.getElementById("acAgentId").value,
+                    commission_type: document.getElementById("acType").value,
+                    amount: parseFloat(document.getElementById("acAmount").value),
+                    status: document.getElementById("acStatus").value,
+                    notes: document.getElementById("acNotes").value.trim()
+                })
+            });
+            document.getElementById("awardCommModal").classList.remove("open");
+            showToast("Commission recorded for agent.");
+            await loadSupportTeam();
+        } catch (err) {
+            showToast(err.message, "error");
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    window.__gmPayComm = async (commId) => {
+        try {
+            await supportAdminFetch(`/commissions/${commId}/pay`, { method: "PATCH" });
+            showToast("Commission marked as paid.");
+            await loadSupportTeam();
+        } catch (err) {
+            showToast(err.message, "error");
+        }
+    };
 });

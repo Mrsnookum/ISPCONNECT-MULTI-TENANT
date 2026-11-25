@@ -7,6 +7,7 @@ const POLL_MS = 25 * 1000;              // 25s live inbox/alert refresh
 let authToken = localStorage.getItem("isp_support_token") || "";
 let currentAgent = null;
 let isOnline = true;
+let activeTab = "inbox";
 let activeInqFilter = "";
 let activeStageFilter = "";
 let lastOpenIncidentCount = 0;
@@ -166,16 +167,24 @@ async function pollLiveQueues() {
 }
 
 function switchTab(tab) {
+    if (!tab) return;
+    activeTab = tab;
+
     ["inbox", "alerts", "leads", "diagnostics", "more"].forEach((t) => {
-        $(`tab-${t}`).classList.toggle("hidden", t !== tab);
+        const sec = $(`tab-${t}`);
+        if (sec) sec.classList.toggle("hidden", t !== tab);
     });
     document.querySelectorAll("[data-tab]").forEach((btn) => {
         btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
     });
-    if (tab === "inbox") loadInquiries();
-    if (tab === "alerts") loadIncidents();
-    if (tab === "leads") loadLeads();
-    if (tab === "more") loadCommissions();
+    window.scrollTo({ top: 0, behavior: "instant" });
+
+    requestAnimationFrame(() => {
+        if (tab === "inbox") loadInquiries(true);
+        if (tab === "alerts") loadIncidents(true);
+        if (tab === "leads") loadLeads();
+        if (tab === "more") loadCommissions();
+    });
 }
 
 async function bootDashboard() {
@@ -193,7 +202,7 @@ async function bootDashboard() {
 
         if (currentAgent.must_change_password) $("forcePwModal").classList.add("active");
         startTimers();
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
         await Promise.all([sendHeartbeat(true), loadInquiries(), loadIncidents(), loadLeads(), loadCommissions()]);
     } catch {
         performLogout("manual", false, "");
@@ -413,7 +422,7 @@ async function loadCommissions() {
 
 // --- EVENTS ---
 document.addEventListener("DOMContentLoaded", () => {
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 
     $("loginForm").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -440,8 +449,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    document.querySelectorAll("[data-tab]").forEach((btn) => {
-        btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
+    document.addEventListener("click", (e) => {
+        const tabBtn = e.target.closest("[data-tab]");
+        if (!tabBtn) return;
+        e.preventDefault();
+        switchTab(tabBtn.getAttribute("data-tab"));
     });
 
     [$("sideDutyBtn"), $("mobDutyBtn")].forEach((b) => {

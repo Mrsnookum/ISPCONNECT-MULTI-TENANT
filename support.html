@@ -10,7 +10,8 @@
     <style>
         :root{--primary:#10B981;--primary-dark:#059669;--primary-soft:#ECFDF5;--dark:#0F172A;--bg:#F4F7FB;--card:#FFFFFF;--text:#0F172A;--muted:#64748B;--border:#E2E8F0;--danger:#EF4444;--warn:#F59E0B;--blue:#2563EB;--shadow:0 6px 20px rgba(15,23,42,0.06);}
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif;}
-        html,body{overflow-x:hidden;background:var(--bg);color:var(--text);min-height:100dvh;}
+        html{background:var(--bg);}
+        body{overflow-x:clip;background:var(--bg);color:var(--text);min-height:100dvh;}
         button,input,select,textarea{font-family:inherit;}
         .hidden{display:none !important;}
 
@@ -54,6 +55,7 @@
         .side-brand span{font-size:0.66rem;background:rgba(16,185,129,0.2);color:#34D399;padding:2px 8px;border-radius:99px;font-weight:700;}
         .side-nav{display:flex;flex-direction:column;gap:5px;flex:1;}
         .nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:none;background:transparent;color:#94A3B8;font-size:0.88rem;font-weight:600;cursor:pointer;text-align:left;transition:all 0.18s;}
+        .nav-btn *{pointer-events:none;}
         .nav-btn:hover{background:rgba(255,255,255,0.06);color:#fff;}
         .nav-btn.active{background:var(--primary);color:#fff;}
         .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:99px;display:none;}
@@ -122,15 +124,17 @@
         .modal-head h3{font-size:1.08rem;font-weight:800;}
         .modal-x{border:none;background:#F1F5F9;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;}
 
-        .toast{position:fixed;bottom:84px;right:16px;z-index:1100;background:var(--dark);color:#fff;padding:12px 16px;border-radius:10px;font-size:0.84rem;font-weight:600;box-shadow:0 12px 28px rgba(0,0,0,0.22);transform:translateY(140%);opacity:0;transition:all 0.25s;max-width:calc(100vw - 32px);}
+        .toast{position:fixed;bottom:86px;right:16px;z-index:1100;background:var(--dark);color:#fff;padding:12px 16px;border-radius:10px;font-size:0.84rem;font-weight:600;box-shadow:0 12px 28px rgba(0,0,0,0.22);transform:translateY(20px);opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;max-width:calc(100vw - 32px);}
         .toast.show{transform:translateY(0);opacity:1;}
         .toast.err{background:#DC2626;} .toast.ok{background:#059669;}
 
         /* MOBILE BOTTOM BAR WITH LUCIDE ICONS */
-        .mobile-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:90;padding:6px 4px calc(6px + env(safe-area-inset-bottom));grid-template-columns:repeat(5,1fr);gap:2px;box-shadow:0 -4px 16px rgba(15,23,42,0.06);}
-        .mobile-bar button{position:relative;border:none;background:none;padding:6px 2px;font-size:0.68rem;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border-radius:8px;}
+        .mobile-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:500;padding:6px 6px calc(6px + env(safe-area-inset-bottom));grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;box-shadow:0 -4px 16px rgba(15,23,42,0.08);transform:translateZ(0);-webkit-transform:translateZ(0);}
+        .mobile-bar button{position:relative;border:none;background:transparent;min-height:52px;padding:6px 2px;font-size:0.68rem;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border-radius:10px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;transition:background-color 0.12s,color 0.12s,transform 0.08s;}
+        .mobile-bar button *{pointer-events:none;}
+        .mobile-bar button:active{transform:scale(0.94);}
         .mobile-bar button.active{color:var(--primary-dark);background:var(--primary-soft);}
-        .mob-dot{position:absolute;top:2px;right:14%;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--danger);color:#fff;font-size:0.62rem;font-weight:800;display:none;align-items:center;justify-content:center;}
+        .mob-dot{position:absolute;top:4px;right:calc(50% - 18px);min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--danger);color:#fff;font-size:0.62rem;font-weight:800;display:none;align-items:center;justify-content:center;}
         .mob-dot.show{display:inline-flex;}
 
         @media (max-width:960px){
@@ -183,21 +187,21 @@
                 ISPConnect <span>SUPPORT</span>
             </div>
             <nav class="side-nav">
-                <button class="nav-btn active" data-tab="inbox">
+                <button type="button" class="nav-btn active" data-tab="inbox">
                     <i data-lucide="mail" width="17"></i> Inbox
                     <span class="nav-badge" id="sideInboxBadge">0</span>
                 </button>
-                <button class="nav-btn" data-tab="alerts">
+                <button type="button" class="nav-btn" data-tab="alerts">
                     <i data-lucide="bell-ring" width="17"></i> Live Alerts
                     <span class="nav-badge" id="sideAlertsBadge">0</span>
                 </button>
-                <button class="nav-btn" data-tab="leads">
+                <button type="button" class="nav-btn" data-tab="leads">
                     <i data-lucide="users" width="17"></i> Leads Pipeline
                 </button>
-                <button class="nav-btn" data-tab="diagnostics">
+                <button type="button" class="nav-btn" data-tab="diagnostics">
                     <i data-lucide="search" width="17"></i> Diagnostics
                 </button>
-                <button class="nav-btn" data-tab="more">
+                <button type="button" class="nav-btn" data-tab="more">
                     <i data-lucide="wallet" width="17"></i> Earnings &amp; Guide
                 </button>
             </nav>
@@ -207,7 +211,7 @@
                     <button type="button" class="duty-pill duty-on" id="sideDutyBtn"><span class="duty-dot"></span> Online</button>
                 </div>
                 <small id="sideAgentMeta">Served today: 0 · Ref: —</small>
-                <button class="btn btn-outline btn-sm" id="logoutBtn" style="width:100%;">
+                <button type="button" class="btn btn-outline btn-sm" id="logoutBtn" style="width:100%;">
                     <i data-lucide="log-out" width="14"></i> Log Out
                 </button>
             </div>
@@ -369,26 +373,26 @@
         </div>
 
         <!-- MOBILE BOTTOM BAR WITH LUCIDE ICONS -->
-        <nav class="mobile-bar">
-            <button class="active" data-tab="inbox">
+        <nav class="mobile-bar" id="mobileBar">
+            <button type="button" class="active" data-tab="inbox">
                 <i data-lucide="mail" width="19"></i>
                 <span>Inbox</span>
                 <span class="mob-dot" id="mobInboxBadge">0</span>
             </button>
-            <button data-tab="alerts">
+            <button type="button" data-tab="alerts">
                 <i data-lucide="bell-ring" width="19"></i>
                 <span>Alerts</span>
                 <span class="mob-dot" id="mobAlertsBadge">0</span>
             </button>
-            <button data-tab="leads">
+            <button type="button" data-tab="leads">
                 <i data-lucide="users" width="19"></i>
                 <span>Leads</span>
             </button>
-            <button data-tab="diagnostics">
+            <button type="button" data-tab="diagnostics">
                 <i data-lucide="search" width="19"></i>
                 <span>Check</span>
             </button>
-            <button data-tab="more">
+            <button type="button" data-tab="more">
                 <i data-lucide="wallet" width="19"></i>
                 <span>More</span>
             </button>
@@ -499,6 +503,6 @@
     </div>
 
     <div class="toast" id="toast"></div>
-    <script src="support.js"></script>
+    <script src="support.js?v=2"></script>
 </body>
 </html>

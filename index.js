@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 9. ENTERPRISE QUOTE MODAL -> WHATSAPP ---
+    // --- 9. ENTERPRISE QUOTE MODAL -> SAVE TO SUPPORT INBOX + WHATSAPP ---
     const enterpriseBtn = document.getElementById("enterpriseBtn");
     const enterpriseForm = document.getElementById("enterpriseForm");
 
@@ -205,16 +205,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const routers = document.getElementById("entRouters").value.trim();
             const notes = document.getElementById("entNotes").value.trim();
 
+            fetch("https://api.ispconnect.co.ke/api/support/public/inquiry", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                keepalive: true,
+                body: JSON.stringify({
+                    source: "enterprise_quote",
+                    sender_name: name,
+                    plan_interest: "Enterprise Edition",
+                    routers_info: routers,
+                    subject: `Enterprise Quote — ${name}`,
+                    message: `Routers/Sites: ${routers}${notes ? `\nNotes: ${notes}` : ""}`
+                })
+            }).catch(() => {});
+
             const msg = `Hi ISPConnect! I'm interested in the *Enterprise Edition (Full Single-ISP System Ownership)*.\n\n*Name/ISP:* ${name}\n*Routers/Sites:* ${routers}${notes ? `\n*Notes:* ${notes}` : ""}`;
             window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
 
             enterpriseForm.reset();
             closeAllModals();
-            openModal("Quote Request Ready", "WhatsApp has been opened with your Enterprise inquiry. Our team will respond with tailored pricing shortly.");
+            openModal("Quote Request Sent", "Your Enterprise inquiry has been logged with our support team and opened in WhatsApp.");
         });
     }
 
-    // --- 10. CONTACT FORM SUBMISSION ---
+    // --- 10. CONTACT FORM SUBMISSION -> SAVE TO SUPPORT INBOX + WHATSAPP ---
     const contactForm = document.getElementById("contactForm");
     if (contactForm) {
         contactForm.addEventListener("submit", (e) => {
@@ -224,11 +238,25 @@ document.addEventListener("DOMContentLoaded", () => {
             const plan = document.getElementById("contactPlan").value;
             const message = document.getElementById("contactMessage").value.trim();
 
+            fetch("https://api.ispconnect.co.ke/api/support/public/inquiry", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                keepalive: true,
+                body: JSON.stringify({
+                    source: "contact_form",
+                    sender_name: name,
+                    sender_phone: phone,
+                    plan_interest: plan,
+                    subject: `Contact Form — ${plan}`,
+                    message: message
+                })
+            }).catch(() => {});
+
             const waText = `Hi ISPConnect!\n*Name:* ${name}\n*Phone:* ${phone}\n*Interested In:* ${plan}\n*Message:* ${message}`;
             window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waText)}`, "_blank", "noopener");
 
             contactForm.reset();
-            openModal("Message Prepared", "Thank you for reaching out! Your inquiry has been loaded into WhatsApp so our technical team can assist you immediately.");
+            openModal("Message Sent", "Your message has been logged to our Support Desk and loaded into WhatsApp.");
         });
     }
 });

@@ -4,142 +4,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISPConnect | Smart Wi-Fi. Simple Billing.</title>
+    <meta name="description" content="Automate your MikroTik Wi-Fi hotspot, collect M-Pesa payments, send SMS vouchers, and scale your Kenyan ISP with ISPConnect Cloud or Enterprise.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/jpeg" sizes="32x32" href="favicon.jpg">
     <link rel="icon" type="image/jpeg" sizes="192x192" href="favicon.jpg">
-   <link rel="apple-touch-icon" href="favicon.jpg">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="favicon.jpg">
     <style>
-        /* TIGHTLY COMPRESSED CSS */
-        :root{--primary:#10B981;--primary-dark:#059669;--bg:#F8FAFC;--card-bg:#FFFFFF;--text-dark:#111827;--text-muted:#6B7280;--border:#E5E7EB;--shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);}
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
-        body{background-color:var(--bg);color:var(--text-dark);line-height:1.5;overflow-x:hidden;}
-        a{text-decoration:none;color:inherit;} ul{list-style:none;}
-        .container{max-width:1200px;margin:0 auto;padding:0 24px;}
-        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:8px;font-weight:600;cursor:pointer;transition:all 0.3s ease;border:none;font-size:1rem;}
-        .btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 6px rgba(16,185,129,0.25);}
-        .btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 6px 12px rgba(16,185,129,0.3);}
-        .btn-outline{background:transparent;color:var(--text-dark);}
-        .btn-outline:hover{color:var(--primary);}
-        .status-badge{font-size:0.75rem;padding:4px 12px;border-radius:99px;font-weight:600;display:inline-block;}
-        .badge-green{background:#D1FAE5;color:#065F46;} .badge-blue{background:#DBEAFE;color:#1E40AF;} .badge-purple{background:#F3E8FF;color:#6B21A8;}
-        
+        :root{--primary:#10B981;--primary-dark:#059669;--primary-soft:#ECFDF5;--accent:#2563EB;--bg:#F8FAFC;--card:#FFFFFF;--dark:#0F172A;--text:#111827;--muted:#64748B;--border:#E2E8F0;--shadow:0 10px 25px -5px rgba(15,23,42,0.07),0 4px 10px -4px rgba(15,23,42,0.04);--shadow-lg:0 20px 40px -12px rgba(15,23,42,0.12);}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;}
+        html{scroll-behavior:smooth;overflow-x:hidden;}
+        body{background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+        a{text-decoration:none;color:inherit;} ul{list-style:none;} img{max-width:100%;display:block;}
+        .container{width:100%;max-width:1200px;margin:0 auto;padding:0 20px;}
+
+        /* BUTTONS & BADGES */
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border-radius:10px;font-weight:600;cursor:pointer;transition:all 0.22s ease;border:1.5px solid transparent;font-size:0.95rem;white-space:nowrap;}
+        .btn-primary{background:var(--primary);color:#fff;box-shadow:0 6px 16px rgba(16,185,129,0.28);}
+        .btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 10px 22px rgba(16,185,129,0.34);}
+        .btn-dark{background:var(--dark);color:#fff;box-shadow:0 6px 16px rgba(15,23,42,0.2);}
+        .btn-dark:hover{background:#1E293B;transform:translateY(-2px);}
+        .btn-outline{background:#fff;color:var(--text);border-color:var(--border);}
+        .btn-outline:hover{border-color:var(--primary);color:var(--primary-dark);background:var(--primary-soft);}
+        .btn-ghost{background:transparent;color:var(--text);}
+        .btn-ghost:hover{color:var(--primary);}
+        .badge{display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;padding:5px 12px;border-radius:99px;font-weight:700;letter-spacing:0.02em;}
+        .badge-green{background:#D1FAE5;color:#065F46;}
+        .badge-blue{background:#DBEAFE;color:#1E40AF;}
+        .badge-purple{background:#F3E8FF;color:#6B21A8;}
+        .badge-dark{background:rgba(16,185,129,0.16);color:#34D399;border:1px solid rgba(52,211,153,0.3);}
+
+        /* SCROLL REVEAL */
+        .reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1),transform 0.6s cubic-bezier(0.16,1,0.3,1);}
+        .reveal.visible{opacity:1;transform:translateY(0);}
+        .reveal-delay-1{transition-delay:0.08s;} .reveal-delay-2{transition-delay:0.16s;} .reveal-delay-3{transition-delay:0.24s;}
+
         /* NAVBAR */
-        nav{position:fixed;top:0;width:100%;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);z-index:100;border-bottom:1px solid var(--border);transition:all 0.3s;}
+        nav{position:fixed;top:0;left:0;width:100%;background:rgba(255,255,255,0.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:100;border-bottom:1px solid rgba(226,232,240,0.8);transition:box-shadow 0.25s ease;}
         .nav-container{display:flex;justify-content:space-between;align-items:center;height:72px;}
-        .logo{font-size:1.5rem;font-weight:800;color:var(--text-dark);display:flex;align-items:center;gap:8px;}
-        .logo svg{color:var(--primary);}
-        .nav-menu{display:flex;align-items:center;gap:32px;font-weight:500;}
-        .nav-links{display:flex;gap:32px;}
-        .nav-links a:hover{color:var(--primary);}
-        .nav-actions{display:flex;align-items:center;gap:24px;}
-        .nav-actions svg{width:18px;height:18px;}
-        .mobile-toggle{display:none;background:none;border:none;cursor:pointer;color:var(--text-dark);}
-        
+        .logo{font-size:1.38rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:9px;letter-spacing:-0.025em;}
+        .logo-icon{width:34px;height:34px;border-radius:9px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;}
+        .nav-menu{display:flex;align-items:center;gap:28px;font-weight:500;font-size:0.93rem;}
+        .nav-links{display:flex;gap:26px;}
+        .nav-links a{color:var(--muted);transition:color 0.2s;}
+        .nav-links a:hover{color:var(--primary-dark);}
+        .nav-actions{display:flex;align-items:center;gap:14px;}
+        .mobile-toggle{display:none;background:none;border:none;cursor:pointer;color:var(--text);padding:6px;border-radius:8px;}
+
         /* HERO */
-        .hero{padding:160px 0 80px;display:flex;align-items:center;justify-content:space-between;gap:40px;}
-        .hero-content{flex:0 0 50%;max-width:580px;z-index:2;}
-        .hero-tag{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);font-size:0.875rem;font-weight:600;margin-bottom:24px;}
-        .hero-tag span{width:8px;height:8px;background:var(--primary);border-radius:50%;}
-        .hero h1{font-size:4rem;font-weight:800;line-height:1.1;margin-bottom:24px;letter-spacing:-0.03em;}
-        .hero h1 span{color:var(--primary);}
-        .hero p{font-size:1.125rem;color:var(--text-muted);margin-bottom:40px;line-height:1.6;}
-        .hero-actions{display:flex;gap:20px;margin-bottom:48px;align-items:center;}
-        .hero-trust{display:flex;gap:32px;color:var(--text-muted);font-size:0.875rem;font-weight:500;}
-        .hero-trust div{display:flex;align-items:center;gap:8px;white-space:nowrap;}
-        .hero-trust svg{width:20px;height:20px;color:var(--primary);}
-        .hero-visual{flex:1;position:relative;display:flex;justify-content:flex-end;align-items:center;z-index:1;}
-        .hero-visual img{width:140%;max-width:900px;height:auto;margin-right:-15%;filter:drop-shadow(0 25px 35px rgba(0,0,0,0.1));display:block;}
-        
+        .hero-section{padding:124px 0 84px;position:relative;background:radial-gradient(circle at 82% 18%,rgba(16,185,129,0.12),transparent 42%),radial-gradient(circle at 12% 70%,rgba(37,99,235,0.06),transparent 40%);}
+        .hero{display:grid;grid-template-columns:1.05fr 0.95fr;align-items:center;gap:48px;}
+        .hero-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:#fff;border:1px solid var(--border);border-radius:99px;color:var(--text);font-size:0.82rem;font-weight:600;margin-bottom:22px;box-shadow:0 2px 8px rgba(15,23,42,0.04);}
+        .hero-tag .pulse-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;box-shadow:0 0 0 4px rgba(16,185,129,0.2);animation:pulse 2s infinite;}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(16,185,129,0.22);}50%{box-shadow:0 0 0 7px rgba(16,185,129,0.05);}}
+        .hero h1{font-size:clamp(2.35rem,4.6vw,3.9rem);font-weight:800;line-height:1.08;margin-bottom:20px;letter-spacing:-0.035em;}
+        .hero h1 span{background:linear-gradient(135deg,#10B981 0%,#059669 60%,#0EA5E9 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .hero p{font-size:clamp(1rem,1.4vw,1.125rem);color:var(--muted);margin-bottom:32px;max-width:540px;}
+        .hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:36px;}
+        .hero-trust{display:flex;flex-wrap:wrap;gap:18px 26px;color:var(--muted);font-size:0.86rem;font-weight:600;}
+        .hero-trust div{display:flex;align-items:center;gap:7px;}
+        .hero-trust svg{width:18px;height:18px;color:var(--primary);flex-shrink:0;}
+        .hero-visual{position:relative;display:flex;justify-content:center;align-items:center;}
+        .hero-visual img{width:100%;max-width:620px;height:auto;filter:drop-shadow(0 24px 38px rgba(15,23,42,0.14));animation:floatY 6s ease-in-out infinite;}
+        @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+
+        /* STATS STRIP */
+        .stats-strip{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:26px 0;}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center;}
+        .stat-item strong{display:block;font-size:1.55rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+        .stat-item span{font-size:0.82rem;color:var(--muted);font-weight:500;}
+
         /* SECTIONS */
-        .section{padding:100px 0;}
-        .section-header{text-align:center;margin-bottom:60px;}
-        .section-tag{color:var(--primary);font-weight:700;font-size:0.875rem;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;display:block;}
-        .section-header h2{font-size:2.5rem;font-weight:800;margin-bottom:16px;letter-spacing:-0.02em;}
-        .section-header p{font-size:1.125rem;color:var(--text-muted);max-width:600px;margin:0 auto;}
-        
+        .section{padding:88px 0;}
+        .section-white{background:#fff;}
+        .section-header{text-align:center;margin-bottom:52px;max-width:660px;margin-left:auto;margin-right:auto;}
+        .section-tag{color:var(--primary-dark);background:var(--primary-soft);display:inline-block;padding:5px 13px;border-radius:99px;font-weight:700;font-size:0.76rem;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
+        .section-header h2{font-size:clamp(1.75rem,3.2vw,2.5rem);font-weight:800;margin-bottom:14px;letter-spacing:-0.025em;line-height:1.18;}
+        .section-header p{font-size:1.02rem;color:var(--muted);}
+
         /* HOW IT WORKS */
-        .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative;z-index:2;}
-        .step-card{background:var(--card-bg);padding:32px 24px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--border);display:flex;flex-direction:column;}
-        .step-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
-        .step-number{width:28px;height:28px;background:#D1FAE5;color:var(--primary-dark);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;}
-        .step-icon{width:40px;height:40px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-dark);}
-        .step-card h3{font-size:1.125rem;margin-bottom:12px;font-weight:700;}
-        .step-card p{color:var(--text-muted);font-size:0.9rem;margin-bottom:24px;flex-grow:1;}
-        .step-card:not(:last-child)::after{content:'';position:absolute;width:24px;height:24px;right:-24px;top:50%;transform:translateY(-50%);background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2310B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>') no-repeat center;background-size:contain;z-index:1;}
-        
+        .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+        .step-card{background:var(--card);padding:28px 22px;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform 0.25s ease,border-color 0.25s ease;}
+        .step-card:hover{transform:translateY(-4px);border-color:rgba(16,185,129,0.5);}
+        .step-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+        .step-number{width:30px;height:30px;background:var(--primary-soft);color:var(--primary-dark);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;}
+        .step-icon{width:40px;height:40px;background:#F1F5F9;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text);}
+        .step-card h3{font-size:1.08rem;margin-bottom:8px;font-weight:700;}
+        .step-card p{color:var(--muted);font-size:0.89rem;margin-bottom:18px;flex-grow:1;}
+
         /* FEATURES */
-        .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;}
-        .feature-card{background:var(--card-bg);padding:40px 32px;border-radius:16px;border:1px solid var(--border);transition:all 0.3s;}
-        .feature-card:hover{box-shadow:var(--shadow);border-color:var(--primary);transform:translateY(-4px);}
-        .feature-icon-lg{width:48px;height:48px;background:#ECFDF5;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--primary);margin-bottom:24px;}
-        .feature-card h3{font-size:1.25rem;margin-bottom:12px;font-weight:700;}
-        .feature-card p{color:var(--text-muted);font-size:0.95rem;line-height:1.6;}
-        
+        .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+        .feature-card{background:var(--card);padding:32px 26px;border-radius:16px;border:1px solid var(--border);transition:all 0.25s ease;}
+        .feature-card:hover{box-shadow:var(--shadow-lg);border-color:var(--primary);transform:translateY(-4px);}
+        .feature-icon-lg{width:46px;height:46px;background:var(--primary-soft);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--primary-dark);margin-bottom:18px;}
+        .feature-card h3{font-size:1.15rem;margin-bottom:10px;font-weight:700;}
+        .feature-card p{color:var(--muted);font-size:0.92rem;line-height:1.6;}
+
+        /* INTERACTIVE ESTIMATOR */
+        .estimator-box{max-width:960px;margin:0 auto 48px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px 32px;box-shadow:var(--shadow);display:grid;grid-template-columns:1.15fr 0.85fr;gap:32px;align-items:center;}
+        .estimator-controls h3{font-size:1.15rem;font-weight:800;margin-bottom:6px;}
+        .estimator-controls p{font-size:0.88rem;color:var(--muted);margin-bottom:20px;}
+        .slider-group{margin-bottom:16px;}
+        .slider-label{display:flex;justify-content:space-between;font-size:0.86rem;font-weight:600;margin-bottom:8px;}
+        .slider-label strong{color:var(--primary-dark);}
+        input[type="range"]{width:100%;accent-color:var(--primary);height:6px;border-radius:99px;cursor:pointer;}
+        .estimator-result{background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);color:#fff;padding:24px;border-radius:16px;text-align:center;}
+        .estimator-result span{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:#94A3B8;font-weight:700;}
+        .estimator-amount{font-size:clamp(1.8rem,3vw,2.35rem);font-weight:800;color:#34D399;margin:6px 0 8px;letter-spacing:-0.02em;}
+        .estimator-note{font-size:0.82rem;color:#CBD5E1;line-height:1.5;}
+
+        /* PRICING (CLOUD + ENTERPRISE) */
+        .pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;max-width:960px;margin:0 auto;align-items:stretch;}
+        .pricing-card{background:var(--card);border-radius:20px;border:1.5px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;transition:transform 0.25s ease,box-shadow 0.25s ease;}
+        .pricing-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+        .pricing-card.enterprise{background:linear-gradient(160deg,#0F172A 0%,#16243D 100%);color:#fff;border-color:#1E3A5F;}
+        .pricing-top{padding:32px 28px 24px;border-bottom:1px solid var(--border);}
+        .pricing-card.enterprise .pricing-top{border-bottom-color:rgba(255,255,255,0.1);}
+        .pricing-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+        .pricing-top h3{font-size:1.35rem;font-weight:800;}
+        .pricing-subtitle{font-size:0.9rem;color:var(--muted);margin-bottom:20px;}
+        .pricing-card.enterprise .pricing-subtitle{color:#94A3B8;}
+        .price-display{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+        .price-currency{font-size:1.05rem;font-weight:700;color:var(--muted);}
+        .price-amount{font-size:clamp(2.2rem,4vw,2.85rem);font-weight:800;letter-spacing:-0.03em;line-height:1;}
+        .price-period{font-size:0.92rem;color:var(--muted);font-weight:500;}
+        .pricing-card.enterprise .price-amount{font-size:clamp(1.75rem,3vw,2.2rem);color:#34D399;}
+        .pricing-card.enterprise .price-period{color:#94A3B8;}
+        .pricing-body{padding:26px 28px;flex-grow:1;display:flex;flex-direction:column;gap:18px;}
+        .pricing-list{display:flex;flex-direction:column;gap:12px;}
+        .pricing-list li{display:flex;align-items:flex-start;gap:10px;font-size:0.92rem;color:#334155;}
+        .pricing-card.enterprise .pricing-list li{color:#E2E8F0;}
+        .pricing-list svg{width:18px;height:18px;flex-shrink:0;margin-top:2px;color:var(--primary);}
+        .pricing-note{font-size:0.82rem;padding:12px 14px;border-radius:10px;background:#F8FAFC;border:1px solid var(--border);color:var(--muted);line-height:1.5;}
+        .pricing-card.enterprise .pricing-note{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);color:#CBD5E1;}
+        .pricing-footer{padding:22px 28px 28px;margin-top:auto;}
+        .pricing-footer .btn{width:100%;padding:14px 20px;}
+
         /* FAQ */
-        .faq-container{max-width:800px;margin:0 auto;}
-        .faq-item{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
-        .faq-question{width:100%;text-align:left;padding:24px;background:none;border:none;font-size:1.125rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:var(--text-dark);}
-        .faq-answer{padding:0 24px;max-height:0;overflow:hidden;transition:all 0.3s ease;color:var(--text-muted);line-height:1.6;}
-        .faq-item.active .faq-answer{padding:0 24px 24px;max-height:300px;}
-        .faq-item.active .faq-question{color:var(--primary);}
-        
+        .faq-container{max-width:820px;margin:0 auto;}
+        .faq-item{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:14px;overflow:hidden;transition:border-color 0.2s ease;}
+        .faq-item.active{border-color:var(--primary);}
+        .faq-question{width:100%;text-align:left;padding:20px 22px;background:none;border:none;font-size:1rem;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;color:var(--text);}
+        .faq-icon{width:26px;height:26px;border-radius:50%;background:#F1F5F9;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;transition:transform 0.25s ease,background 0.25s ease,color 0.25s ease;}
+        .faq-item.active .faq-icon{background:var(--primary-soft);color:var(--primary-dark);transform:rotate(45deg);}
+        .faq-answer{max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.3s ease;padding:0 22px;color:var(--muted);font-size:0.93rem;line-height:1.65;}
+        .faq-item.active .faq-answer{padding:0 22px 20px;max-height:320px;}
+
         /* CONTACT */
-        .contact-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:60px;}
-        .contact-info h3{font-size:1.5rem;margin-bottom:24px;font-weight:700;}
-        .contact-info p{color:var(--text-muted);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
-        .contact-form{background:var(--card-bg);padding:40px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--border);}
-        .form-group{margin-bottom:20px;}
-        .form-group label{display:block;margin-bottom:8px;font-weight:600;font-size:0.9rem;}
-        .form-group input,.form-group textarea{width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;background:#F9FAFB;transition:all 0.2s;}
-        .form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);background:#FFF;box-shadow:0 0 0 3px rgba(16,185,129,0.1);}
-        
+        .contact-grid{display:grid;grid-template-columns:1fr 1.35fr;gap:48px;align-items:start;}
+        .contact-info h2{font-size:clamp(1.7rem,3vw,2.2rem);font-weight:800;margin-bottom:14px;letter-spacing:-0.02em;}
+        .contact-info > p{color:var(--muted);margin-bottom:28px;}
+        .contact-cards{display:flex;flex-direction:column;gap:14px;}
+        .contact-mini{display:flex;align-items:center;gap:14px;padding:16px 18px;background:#fff;border:1px solid var(--border);border-radius:14px;transition:border-color 0.2s;}
+        .contact-mini:hover{border-color:var(--primary);}
+        .contact-mini-icon{width:42px;height:42px;border-radius:10px;background:var(--primary-soft);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .contact-mini small{display:block;font-size:0.76rem;color:var(--muted);font-weight:600;}
+        .contact-mini strong{font-size:0.95rem;color:var(--text);}
+        .contact-form{background:var(--card);padding:34px;border-radius:18px;box-shadow:var(--shadow);border:1px solid var(--border);}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        .form-group{margin-bottom:18px;}
+        .form-group label{display:block;margin-bottom:7px;font-weight:600;font-size:0.86rem;color:var(--text);}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.93rem;background:#F8FAFC;color:var(--text);transition:all 0.2s;}
+        .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(16,185,129,0.12);}
+
         /* FOOTER */
-        footer{background:var(--text-dark);color:#9CA3AF;padding:80px 0 40px;}
-        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:60px;}
-        .footer-brand h2{color:#FFF;font-size:1.5rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        footer{background:var(--dark);color:#94A3B8;padding:72px 0 32px;}
+        .footer-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+        .footer-brand h2{color:#fff;font-size:1.35rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
         .footer-brand svg{color:var(--primary);}
-        .footer-brand p{max-width:320px;line-height:1.6;}
-        .footer-links h4{color:#FFF;margin-bottom:24px;font-weight:600;}
-        .footer-links ul li{margin-bottom:12px;}
+        .footer-brand p{max-width:320px;font-size:0.9rem;line-height:1.65;}
+        .footer-links h4{color:#fff;margin-bottom:16px;font-size:0.95rem;font-weight:700;}
+        .footer-links ul li{margin-bottom:10px;font-size:0.9rem;}
         .footer-links ul li a{transition:color 0.2s;}
-        .footer-links ul li a:hover{color:#FFF;}
-        .footer-bottom{text-align:center;padding-top:32px;border-top:1px solid #374151;font-size:0.9rem;}
-        
-        /* MODAL */
-        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(17,24,39,0.7);backdrop-filter:blur(4px);display:flex;justify-content:center;align-items:center;z-index:999;opacity:0;visibility:hidden;transition:all 0.3s;}
+        .footer-links ul li a:hover{color:#fff;}
+        .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:26px;border-top:1px solid rgba(255,255,255,0.1);font-size:0.85rem;}
+
+        /* MODALS */
+        .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.72);backdrop-filter:blur(5px);display:flex;justify-content:center;align-items:center;padding:16px;z-index:999;opacity:0;visibility:hidden;transition:all 0.25s ease;}
         .modal-overlay.active{opacity:1;visibility:visible;}
-        .modal-box{background:#FFF;padding:40px;border-radius:16px;width:90%;max-width:420px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);transform:translateY(20px);transition:all 0.3s;}
-        .modal-overlay.active .modal-box{transform:translateY(0);}
-        .modal-icon{width:64px;height:64px;background:#D1FAE5;color:var(--primary-dark);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;}
-        .modal-box h3{font-size:1.5rem;margin-bottom:12px;font-weight:700;color:var(--text-dark);}
-        .modal-box p{color:var(--text-muted);margin-bottom:32px;line-height:1.6;}
-        
-        /* RESPONSIVE DESIGN */
-        @media (max-width: 1024px) {
-            .hero{flex-direction:column;text-align:center;padding:120px 0 60px;gap:40px;}
-            .hero-content{max-width:100%;flex:1;}
-            .hero-tag{margin:0 auto 24px;}
-            .hero-actions{justify-content:center;}
-            .hero-trust{justify-content:center;flex-wrap:wrap;}
-            .hero-visual{width:100%;justify-content:center;}
-            .hero-visual img{width:100%;max-width:700px;margin-right:0;} /* Reset oversized image for mobile */
-            .steps-grid, .features-grid{grid-template-columns:repeat(2,1fr);}
-            .step-card:not(:last-child)::after{display:none;}
+        .modal-box{background:#fff;padding:30px 26px;border-radius:18px;width:100%;max-width:440px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.3);transform:translateY(16px) scale(0.98);transition:all 0.25s ease;position:relative;max-height:90dvh;overflow-y:auto;}
+        .modal-overlay.active .modal-box{transform:translateY(0) scale(1);}
+        .modal-close-x{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:none;background:#F1F5F9;color:var(--muted);cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;}
+        .modal-close-x:hover{background:#E2E8F0;color:var(--text);}
+        .modal-icon{width:56px;height:56px;background:var(--primary-soft);color:var(--primary-dark);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+        .modal-box h3{font-size:1.3rem;margin-bottom:8px;font-weight:800;color:var(--text);}
+        .modal-box p{color:var(--muted);font-size:0.9rem;margin-bottom:22px;line-height:1.55;}
+
+        /* INTERACTIVE DEMO PORTAL MOCK INSIDE MODAL */
+        .demo-phone{background:#F3F6FA;border:1px solid var(--border);border-radius:16px;padding:16px;text-align:left;margin-bottom:18px;}
+        .demo-pkg{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;font-size:0.86rem;font-weight:600;transition:all 0.15s;}
+        .demo-pkg.selected{border-color:#2563EB;background:#F8FBFF;box-shadow:0 0 0 2px rgba(37,99,235,0.12);}
+        .demo-status{font-size:0.8rem;font-weight:600;color:var(--primary-dark);min-height:20px;margin-top:8px;text-align:center;}
+
+        /* FLOATING WHATSAPP */
+        .wa-float{position:fixed;bottom:22px;right:22px;z-index:90;width:54px;height:54px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 25px rgba(37,211,102,0.38);transition:transform 0.2s ease;}
+        .wa-float:hover{transform:scale(1.08);}
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width:1024px){
+            .hero{grid-template-columns:1fr;text-align:center;gap:36px;}
+            .hero p{margin-left:auto;margin-right:auto;}
+            .hero-actions,.hero-trust{justify-content:center;}
+            .steps-grid{grid-template-columns:repeat(2,1fr);}
+            .features-grid{grid-template-columns:repeat(2,1fr);}
+            .estimator-box{grid-template-columns:1fr;padding:24px;}
+            .footer-grid{grid-template-columns:1fr 1fr;}
         }
-        @media (max-width: 768px) {
-            .section{padding:60px 0;}
-            .hero h1{font-size:2.5rem;}
+        @media (max-width:860px){
+            .pricing-grid,.contact-grid{grid-template-columns:1fr;}
+        }
+        @media (max-width:768px){
+            .section{padding:64px 0;}
+            .hero-section{padding:102px 0 56px;}
+            .stats-grid{grid-template-columns:repeat(2,1fr);gap:16px;}
+            .steps-grid,.features-grid,.form-row,.footer-grid{grid-template-columns:1fr;}
             .hero-actions{flex-direction:column;width:100%;}
             .hero-actions .btn{width:100%;}
-            .steps-grid, .features-grid, .contact-grid, .footer-grid{grid-template-columns:1fr;}
-            
-            /* Mobile Navigation Drawer */
-            .mobile-toggle{display:block;}
-            .nav-menu{position:fixed;top:72px;left:0;width:100%;background:#FFF;flex-direction:column;padding:30px 24px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);clip-path:polygon(0 0,100% 0,100% 0,0 0);transition:all 0.3s ease-in-out;gap:24px;}
-            .nav-menu.active{clip-path:polygon(0 0,100% 0,100% 100%,0 100%);}
-            .nav-links{flex-direction:column;align-items:center;width:100%;gap:24px;}
-            .nav-actions{flex-direction:column;width:100%;gap:16px;}
+            .contact-form{padding:24px 20px;}
+            .pricing-top,.pricing-body,.pricing-footer{padding-left:20px;padding-right:20px;}
+            .mobile-toggle{display:flex;align-items:center;justify-content:center;}
+            .nav-menu{position:fixed;top:72px;left:0;width:100%;background:#fff;flex-direction:column;padding:24px 20px 30px;box-shadow:0 16px 32px rgba(15,23,42,0.12);border-bottom:1px solid var(--border);transform:translateY(-120%);opacity:0;pointer-events:none;transition:all 0.28s ease;gap:20px;}
+            .nav-menu.active{transform:translateY(0);opacity:1;pointer-events:auto;}
+            .nav-links{flex-direction:column;align-items:center;width:100%;gap:18px;}
+            .nav-actions{flex-direction:column;width:100%;gap:12px;}
             .nav-actions .btn{width:100%;}
+            .footer-bottom{justify-content:center;text-align:center;}
         }
     </style>
 </head>
@@ -148,13 +236,15 @@
     <!-- NAVIGATION -->
     <nav id="navbar">
         <div class="container nav-container">
-            <div class="logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+            <a href="#home" class="logo">
+                <span class="logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                </span>
                 ISPConnect
-            </div>
-            
-            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </a>
+
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu" aria-expanded="false">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="7" x2="21" y2="7"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="17" x2="21" y2="17"></line></svg>
             </button>
 
             <div class="nav-menu" id="navMenu">
@@ -167,13 +257,10 @@
                     <li><a href="#contact" class="nav-item">Contact</a></li>
                 </ul>
                 <div class="nav-actions">
-                    <a href="register.html" class="nav-item" style="display:flex;align-items:center;gap:6px;color:var(--text-dark);">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        Login
-                    </a>
+                    <a href="register.html" class="btn btn-ghost nav-item" style="padding:10px 14px;">Login</a>
                     <a href="register.html" class="btn btn-primary nav-item">
-                        Get Started 
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        Start Free Trial
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </a>
                 </div>
             </div>
@@ -181,78 +268,88 @@
     </nav>
 
     <!-- HERO SECTION -->
-    <section class="section" id="home">
+    <section class="hero-section" id="home">
         <div class="container hero">
-            <div class="hero-content">
-                <div class="hero-tag"><span></span> Complete Wi-Fi Billing & Hotspot Management</div>
+            <div class="hero-content reveal">
+                <div class="hero-tag"><span class="pulse-dot"></span> Built for Kenyan MikroTik Hotspots & WISPs</div>
                 <h1>Smart Wi-Fi.<br><span>Simple Billing.</span></h1>
-                <p>Automate your Wi-Fi network, manage customers, handle payments, and grow your ISP business — all from one powerful platform.</p>
+                <p>Automate your MikroTik hotspot, collect instant M-Pesa STK Push payments, deliver SMS vouchers, and track revenue in real time — on our managed Cloud or your own dedicated Enterprise server.</p>
                 <div class="hero-actions">
                     <a href="register.html" class="btn btn-primary">
-                        Get Started 
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        Start 14-Day Free Trial
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </a>
-                    <button id="demoBtn" class="btn btn-outline">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
-                        Watch Demo
+                    <button id="demoBtn" class="btn btn-outline" type="button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                        Interactive Demo
                     </button>
                 </div>
                 <div class="hero-trust">
-                    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Secure Bank-grade</div>
-                    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Fast Setup</div>
-                    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg> 24/7 Support</div>
+                    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Direct M-Pesa Settlement</div>
+                    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Works Behind CGNAT</div>
+                    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"></polyline></svg> 14-Day Free Trial</div>
                 </div>
             </div>
-            <div class="hero-visual">
-                <img src="Hero.png" alt="ISPConnect Dashboard and Captive Portal">
+            <div class="hero-visual reveal reveal-delay-1">
+                <img src="Hero.png" alt="ISPConnect Dashboard and Mobile Captive Portal">
             </div>
         </div>
     </section>
 
+    <!-- TRUST STATS STRIP -->
+    <div class="stats-strip">
+        <div class="container stats-grid">
+            <div class="stat-item reveal"><strong>&lt; 10 Min</strong><span>MikroTik Setup Time</span></div>
+            <div class="stat-item reveal reveal-delay-1"><strong>100%</strong><span>Direct Till / Paybill Payout</span></div>
+            <div class="stat-item reveal reveal-delay-2"><strong>99.9%</strong><span>Automated RADIUS Uptime</span></div>
+            <div class="stat-item reveal reveal-delay-3"><strong>24/7</strong><span>Kenyan Technical Support</span></div>
+        </div>
+    </div>
+
     <!-- HOW IT WORKS -->
-    <section class="section" id="how-it-works" style="background:#FFF;">
+    <section class="section section-white" id="how-it-works">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal">
                 <span class="section-tag">How It Works</span>
-                <h2>Get Your ISP Up and Running in 4 Simple Steps</h2>
-                <p>From router setup to customer access — we make it simple.</p>
+                <h2>Launch Your Wi-Fi Business in 4 Simple Steps</h2>
+                <p>No static IP, no complex port forwarding — connect your MikroTik and start collecting M-Pesa in minutes.</p>
             </div>
             <div class="steps-grid">
-                <div class="step-card">
+                <div class="step-card reveal">
                     <div class="step-header">
                         <div class="step-number">1</div>
-                        <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><path d="M6 18h.01"></path><path d="M10 18h.01"></path><path d="M16 10a4 4 0 0 0-8 0"></path><path d="M12 2v2"></path></svg></div>
+                        <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="20" height="8" rx="2"></rect><path d="M6 18h.01M10 18h.01M16 10a4 4 0 0 0-8 0M12 2v2"></path></svg></div>
                     </div>
                     <h3>Add Your MikroTik</h3>
-                    <p>Enter your router details and generate a secure provisioning command.</p>
-                    <div><span class="status-badge badge-green">2 minutes</span></div>
+                    <p>Create your account, add your router name, and generate a secure provisioning script.</p>
+                    <div><span class="badge badge-green">2 minutes</span></div>
                 </div>
-                <div class="step-card">
+                <div class="step-card reveal reveal-delay-1">
                     <div class="step-header">
                         <div class="step-number">2</div>
                         <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg></div>
                     </div>
-                    <h3>Paste the Command</h3>
-                    <p>Open WinBox Terminal, paste the command and press Enter. Your router connects automatically.</p>
-                    <div><span class="status-badge badge-blue">5-10 minutes</span></div>
+                    <h3>Paste in WinBox</h3>
+                    <p>Paste the command into MikroTik Terminal. Hotspot, walled garden, and RADIUS configure automatically.</p>
+                    <div><span class="badge badge-blue">5 minutes</span></div>
                 </div>
-                <div class="step-card">
+                <div class="step-card reveal reveal-delay-2">
                     <div class="step-header">
                         <div class="step-number">3</div>
-                        <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+                        <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg></div>
                     </div>
-                    <h3>Customers Connect</h3>
-                    <p>Users connect to your Wi-Fi, choose a package, pay via M-Pesa, and get instant access.</p>
-                    <div><span class="status-badge badge-purple">Instant</span></div>
+                    <h3>Customers Pay & Connect</h3>
+                    <p>Users join your Wi-Fi, tap a package, enter their M-Pesa PIN, and connect automatically.</p>
+                    <div><span class="badge badge-purple">Instant</span></div>
                 </div>
-                <div class="step-card">
+                <div class="step-card reveal reveal-delay-3">
                     <div class="step-header">
                         <div class="step-number">4</div>
                         <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
                     </div>
-                    <h3>Track & Grow</h3>
-                    <p>Monitor sessions, revenue, and usage with real-time analytics and detailed reports.</p>
-                    <div><span class="status-badge badge-green">Always</span></div>
+                    <h3>Monitor & Scale</h3>
+                    <p>Track active sessions, daily revenue, router heartbeats, and customer history from any phone.</p>
+                    <div><span class="badge badge-green">Real-Time</span></div>
                 </div>
             </div>
         </div>
@@ -261,149 +358,214 @@
     <!-- FEATURES -->
     <section class="section" id="features">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal">
                 <span class="section-tag">Powerful Features</span>
-                <h2>Everything you need to run your WISP</h2>
-                <p>We built the tools so you can focus on expanding your network coverage.</p>
+                <h2>Everything You Need to Run a Modern WISP</h2>
+                <p>Built around real Kenyan hotspot workflows — fast captive portals, reliable M-Pesa recovery, and automated speed caps.</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon-lg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></div>
-                    <h3>Automated M-Pesa</h3>
-                    <p>Native Daraja API integration. Customers pay via STK push, and RADIUS authenticates them instantly.</p>
+                <div class="feature-card reveal">
+                    <div class="feature-icon-lg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></div>
+                    <h3>Automated M-Pesa STK Push</h3>
+                    <p>Seamless PayHero & Daraja integration with active transaction-status verification so paying users never stay stuck.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-lg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+                <div class="feature-card reveal reveal-delay-1">
+                    <div class="feature-icon-lg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
                     <h3>Zero-Friction Onboarding</h3>
-                    <p>Provision routers using a single terminal command. No VPNs, port forwarding, or static IPs required.</p>
+                    <p>Provision routers with a single terminal command. Works reliably behind Starlink, Faiba, and Safaricom CGNAT.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-lg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
-                    <h3>Real-Time Analytics</h3>
-                    <p>Monitor active sessions, MAC addresses, bandwidth consumption, and daily revenue in a centralized dashboard.</p>
+                <div class="feature-card reveal reveal-delay-2">
+                    <div class="feature-icon-lg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+                    <h3>Automated SMS Vouchers & Alerts</h3>
+                    <p>Deliver instant access codes and receive low-balance or router outage alerts via your prepaid SMS wallet.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-lg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
-                    <h3>Prepaid SMS Wallet</h3>
-                    <p>Send automated access codes and alerts. Top up your balance via M-Pesa to keep notifications flowing.</p>
+                <div class="feature-card reveal">
+                    <div class="feature-icon-lg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></div>
+                    <h3>Custom Branded Captive Portal</h3>
+                    <p>Customize your business name, brand colors, welcome message, and tap-to-call customer support number in seconds.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-lg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></div>
-                    <h3>Voucher Generation</h3>
-                    <p>Batch-generate printable PINs or scratch cards for cash-paying customers directly from the portal.</p>
+                <div class="feature-card reveal reveal-delay-1">
+                    <div class="feature-icon-lg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
+                    <h3>Real-Time Analytics & Reconnect</h3>
+                    <p>Track revenue, active sessions, and MAC-bound vouchers — plus instant M-Pesa receipt reconnection for returning users.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-lg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
-                    <h3>Bandwidth Management</h3>
-                    <p>Enforce download and upload speeds automatically using MikroTik Simple Queues injected via RADIUS.</p>
+                <div class="feature-card reveal reveal-delay-2">
+                    <div class="feature-icon-lg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+                    <h3>Precision Speed & Expiry Control</h3>
+                    <p>FreeRADIUS automatically enforces upload/download limits, device caps, data limits, and instant expiry disconnection.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- PRICING -->
-    <section class="section" id="pricing" style="background:var(--bg);">
+    <!-- PRICING (CLOUD + ENTERPRISE) -->
+    <section class="section section-white" id="pricing">
         <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Simple Pricing</span>
-                <h2>One Flat Rate. No Revenue Share.</h2>
-                <p>Keep 100% of what your customers pay you. We just charge a single monthly platform fee.</p>
+            <div class="section-header reveal">
+                <span class="section-tag">Flexible Deployment</span>
+                <h2>Start on Cloud or Own Your Entire System</h2>
+                <p>Choose our ready-to-launch Cloud platform or get a full dedicated Enterprise installation on your own servers.</p>
             </div>
-            
-            <div style="max-width: 800px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden;">
-                <!-- Pricing Header -->
-                <div style="padding: 40px; text-align: center; border-bottom: 1px solid var(--border);">
-                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">ISPConnect Pro</h3>
-                    <div style="font-size: 3rem; font-weight: 800; color: var(--text-dark); display: flex; justify-content: center; align-items: flex-end; gap: 8px;">
-                        <span style="font-size: 1.25rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">KES</span>
-                        1,300
-                        <span style="font-size: 1rem; font-weight: 500; color: var(--text-muted); margin-bottom: 8px;">/ month</span>
+
+            <!-- INTERACTIVE ESTIMATOR -->
+            <div class="estimator-box reveal">
+                <div class="estimator-controls">
+                    <h3>Estimate Your Monthly Hotspot Revenue</h3>
+                    <p>Slide to see how quickly your Wi-Fi hotspot pays for itself.</p>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Daily Paying Users</span><strong id="estUsersVal">40 users/day</strong></div>
+                        <input type="range" id="estUsers" min="5" max="300" step="5" value="40">
+                    </div>
+                    <div class="slider-group" style="margin-bottom:0;">
+                        <div class="slider-label"><span>Average Package Price</span><strong id="estPriceVal">KES 30</strong></div>
+                        <input type="range" id="estPrice" min="10" max="200" step="10" value="30">
                     </div>
                 </div>
+                <div class="estimator-result">
+                    <span>Estimated Monthly Gross</span>
+                    <div class="estimator-amount" id="estMonthlyTotal">KES 36,000</div>
+                    <p class="estimator-note">With ISPConnect Cloud at <strong>KES 1,300/mo</strong>, your platform cost is only <strong id="estCostPct">3.6%</strong> of revenue.</p>
+                </div>
+            </div>
 
-                <!-- Features & Tiers -->
-                <div style="padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-                    <!-- Platform Features -->
-                    <div>
-                        <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 20px;">Everything Included:</h4>
-                        <ul style="color: var(--text-muted); line-height: 1.8;">
-                            <li style="display: flex; gap: 12px;"><svg style="flex-shrink:0; margin-top:4px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Unlimited Client Routers</li>
-                            <li style="display: flex; gap: 12px;"><svg style="flex-shrink:0; margin-top:4px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Unlimited Customers</li>
-                            <li style="display: flex; gap: 12px;"><svg style="flex-shrink:0; margin-top:4px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Real-Time Analytics Dashboard</li>
-                            <li style="display: flex; gap: 12px;"><svg style="flex-shrink:0; margin-top:4px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Custom Branding</li>
+            <!-- DUAL PRICING CARDS -->
+            <div class="pricing-grid">
+                <!-- CARD 1: ISPCONNECT CLOUD (MULTI-TENANT SAAS) -->
+                <div class="pricing-card reveal">
+                    <div class="pricing-top">
+                        <div class="pricing-title-row">
+                            <h3>ISPConnect Cloud</h3>
+                            <span class="badge badge-green">14-Day Free Trial</span>
+                        </div>
+                        <p class="pricing-subtitle">Managed multi-tenant SaaS. We host, maintain, and update everything so you launch today.</p>
+                        <div class="price-display">
+                            <span class="price-currency">KES</span>
+                            <span class="price-amount">1,300</span>
+                            <span class="price-period">/ month</span>
+                        </div>
+                    </div>
+                    <div class="pricing-body">
+                        <ul class="pricing-list">
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>Unlimited MikroTik Routers</strong> & unlimited customers</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>Zero Server Management</strong> — cloud hosting, SSL & FreeRADIUS included</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>Automated M-Pesa STK Push</strong> directly to your Till/Paybill via PayHero</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>Custom Captive Portal</strong> branding & support phone number</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>Prepaid SMS & Payment Wallets</strong> with low-balance alerts</span></li>
                         </ul>
+                        <div class="pricing-note">
+                            <strong>Transparent billing:</strong> Test free for 14 days. Pay-as-you-go SMS credits and tiered transaction wallet fees apply only when customers buy.
+                        </div>
                     </div>
-
-                    <!-- Payment Flexibility -->
-                    <div>
-                        <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 20px;">M-Pesa Flexibility:</h4>
-                        <div style="margin-bottom: 16px;">
-                            <strong style="color: var(--text-dark); display: block;">Tier 1: Managed API</strong>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">Just provide your Till number. We generate the API and handle the code.</p>
-                        </div>
-                        <div>
-                            <strong style="color: var(--text-dark); display: block;">Tier 2: Bring Your Own API</strong>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">Have your own PayHero credentials? Plug them in for zero transaction fees.</p>
-                        </div>
+                    <div class="pricing-footer">
+                        <a href="register.html" class="btn btn-primary">Start 14-Day Free Trial &rarr;</a>
                     </div>
                 </div>
 
-                <!-- CTA -->
-                <div style="padding: 24px 40px; background: #F9FAFB; border-top: 1px solid var(--border); text-align: center;">
-                    <a href="register.html" class="btn btn-primary" style="width: 100%; max-width: 300px;">Start Your ISP Now</a>
+                <!-- CARD 2: ENTERPRISE (SINGLE ISP FULL OWNERSHIP) -->
+                <div class="pricing-card enterprise reveal reveal-delay-1">
+                    <div class="pricing-top">
+                        <div class="pricing-title-row">
+                            <h3>Enterprise Edition</h3>
+                            <span class="badge badge-dark">Full Ownership</span>
+                        </div>
+                        <p class="pricing-subtitle">For single ISPs who want to own and control their entire billing system independently.</p>
+                        <div class="price-display">
+                            <span class="price-amount">Custom Pricing</span>
+                            <span class="price-period">&bull; Negotiable</span>
+                        </div>
+                    </div>
+                    <div class="pricing-body">
+                        <ul class="pricing-list">
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>100% System Ownership</strong> — complete codebase deployed exclusively for your ISP</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>No Monthly Platform Fee</strong> — zero recurring SaaS fees to ISPConnect</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>100% White-Label Brand</strong> — your custom domain, logo, and captive portal footer</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>Dedicated Setup & Handover</strong> — we install FastAPI, FreeRADIUS, database & MikroTik link</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong>Custom Feature Tailoring</strong> — request bespoke workflows for your network</span></li>
+                        </ul>
+                        <div class="pricing-note">
+                            <strong>Self-hosted responsibility:</strong> You directly pay for and manage your own VPS server, hosting, custom domain, SMS gateway, and M-Pesa/PayHero accounts.
+                        </div>
+                    </div>
+                    <div class="pricing-footer">
+                        <button type="button" class="btn btn-primary" id="enterpriseBtn">Request Enterprise Quote &rarr;</button>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- FAQ -->
-    <section class="section" id="faq" style="background:#FFF;">
+    <section class="section" id="faq">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal">
+                <span class="section-tag">FAQ</span>
                 <h2>Frequently Asked Questions</h2>
+                <p>Everything you need to know about setup, M-Pesa payouts, and Cloud vs. Enterprise.</p>
             </div>
             <div class="faq-container">
-                <div class="faq-item">
-                    <button class="faq-question">Do I need a public IP address on my MikroTik? <span>+</span></button>
-                    <div class="faq-answer"><p>No. The router initiates an outbound HTTPS connection to our cloud server to fetch its configuration, bypassing NAT and CGNAT completely. Only our backend server requires a public IP.</p></div>
+                <div class="faq-item reveal">
+                    <button class="faq-question" type="button">Do I need a public IP address on my MikroTik? <span class="faq-icon">+</span></button>
+                    <div class="faq-answer"><p>No. Your MikroTik initiates outbound connections to our RADIUS and provisioning endpoints, working smoothly behind NAT and CGNAT (Starlink, Faiba, Safaricom, Zuku). Only the backend server needs a public IP.</p></div>
                 </div>
-                <div class="faq-item">
-                    <button class="faq-question">Will this overwrite my existing ISP network settings? <span>+</span></button>
-                    <div class="faq-answer"><p>No. The provisioning script checks for conflicting HotSpot setups before applying changes. It only configures the specific interfaces and RADIUS settings required for the billing portal.</p></div>
+                <div class="faq-item reveal">
+                    <button class="faq-question" type="button">Where does the M-Pesa money go when customers pay? <span class="faq-icon">+</span></button>
+                    <div class="faq-answer"><p>Customer payments settle directly into your own connected Till, Paybill, or PayHero account. ISPConnect listens for payment confirmation and immediately activates the user's voucher on MikroTik.</p></div>
                 </div>
-                <div class="faq-item">
-                    <button class="faq-question">Where does the M-Pesa money go? <span>+</span></button>
-                    <div class="faq-answer"><p>Payments flow directly into your own registered Safaricom Till or Paybill number. The system simply listens to the Safaricom validation callback to activate the internet.</p></div>
+                <div class="faq-item reveal">
+                    <button class="faq-question" type="button">What is the difference between ISPConnect Cloud and Enterprise? <span class="faq-icon">+</span></button>
+                    <div class="faq-answer"><p>On <strong>ISPConnect Cloud</strong> (KES 1,300/month), we host and maintain the servers, database, FreeRADIUS, and updates for you so you can start in minutes. With <strong>Enterprise</strong>, you purchase full ownership of the single-ISP system deployed on your own infrastructure, meaning no monthly fees to us — you simply pay your own VPS, domain, hosting, and SMS providers directly.</p></div>
+                </div>
+                <div class="faq-item reveal">
+                    <button class="faq-question" type="button">Will the setup script overwrite my existing MikroTik configuration? <span class="faq-icon">+</span></button>
+                    <div class="faq-answer"><p>No. The provisioning script targets only the hotspot interface, walled garden, and RADIUS client settings needed for billing without wiping your WAN or core routing rules.</p></div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CONTACT -->
-    <section class="section" id="contact">
+    <section class="section section-white" id="contact">
         <div class="container contact-grid">
-            <div class="contact-info">
-                <h2>Ready to automate?</h2>
-                <p style="margin:20px 0 40px; color:var(--text-muted);">Have questions about deployment or pricing? Reach out to our technical team directly.</p>
-                <h3>Contact Details</h3>
-                <p><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> +254 712 153 539</p>
-                <p><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> support@ispconnect.co.ke</p>
+            <div class="contact-info reveal">
+                <span class="section-tag">Talk To Us</span>
+                <h2>Ready to Automate Your Network?</h2>
+                <p>Have questions about MikroTik onboarding, Cloud billing, or negotiating an Enterprise license? Reach our team directly.</p>
+                <div class="contact-cards">
+                    <a href="https://wa.me/254712153539?text=Hi%20ISPConnect%2C%20I%20would%20like%20to%20learn%20more%20about%20your%20Wi-Fi%20billing%20system." target="_blank" rel="noopener" class="contact-mini">
+                        <div class="contact-mini-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+                        <div><small>WhatsApp / Call</small><strong>+254 712 153 539</strong></div>
+                    </a>
+                    <a href="mailto:support@ispconnect.co.ke" class="contact-mini">
+                        <div class="contact-mini-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+                        <div><small>Support Email</small><strong>support@ispconnect.co.ke</strong></div>
+                    </a>
+                </div>
             </div>
-            <div class="contact-form">
+            <div class="contact-form reveal reveal-delay-1">
                 <form id="contactForm">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" placeholder="John Doe" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactName">Full Name</label>
+                            <input type="text" id="contactName" placeholder="e.g. Brian Otieno" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactPhone">Phone / WhatsApp</label>
+                            <input type="tel" id="contactPhone" placeholder="07XXXXXXXX" required>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Phone / WhatsApp</label>
-                        <input type="tel" placeholder="07XXXXXXXX" required>
+                        <label for="contactPlan">Interested In</label>
+                        <select id="contactPlan">
+                            <option value="ISPConnect Cloud (KES 1,300/mo)">ISPConnect Cloud (14-Day Free Trial)</option>
+                            <option value="Enterprise Edition (Full System Ownership)">Enterprise Edition (Own the Full System)</option>
+                            <option value="MikroTik Setup Assistance">MikroTik Setup Assistance</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>Message</label>
-                        <textarea rows="4" placeholder="How many routers do you currently manage?" required></textarea>
+                        <label for="contactMessage">Message</label>
+                        <textarea id="contactMessage" rows="4" placeholder="Tell us how many MikroTik routers or sites you manage..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;">Send Message</button>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Send via WhatsApp / Request Callback</button>
                 </form>
             </div>
         </div>
@@ -414,45 +576,107 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> ISPConnect</h2>
-                    <p style="margin-top:10px;">Smart Wi-Fi. Simple Billing. Automate your WISP management and scale your revenue with ease.</p>
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                        ISPConnect
+                    </h2>
+                    <p>Smart Wi-Fi. Simple Billing. Automated MikroTik hotspot billing, M-Pesa STK Push, and SMS vouchers built for Kenyan ISPs.</p>
                 </div>
                 <div class="footer-links">
-                    <h4>Company</h4>
+                    <h4>Platform</h4>
                     <ul>
-                        <li><a href="#home">Home</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
                         <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Cloud & Enterprise</a></li>
+                        <li><a href="register.html">Start Free Trial</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
                         <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="tel:+254712153539">+254 712 153 539</a></li>
+                        <li><a href="mailto:support@ispconnect.co.ke">support@ispconnect.co.ke</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
                     <h4>Legal</h4>
                     <ul>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Refund Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="refund.html">Refund Policy</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; 2026 ISPConnect. All rights reserved.
+                <span>&copy; 2026 ISPConnect Kenya. All rights reserved.</span>
+                <span>Secure MikroTik & M-Pesa Automation</span>
             </div>
         </div>
     </footer>
 
-    <!-- CUSTOM MODAL (Hidden by default) -->
-    <div class="modal-overlay" id="customModal">
+    <!-- FLOATING WHATSAPP BUTTON -->
+    <a href="https://wa.me/254712153539?text=Hi%20ISPConnect%2C%20I%27d%20like%20to%20inquire%20about%20ISPConnect." target="_blank" rel="noopener" class="wa-float" aria-label="Chat on WhatsApp">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+    </a>
+
+    <!-- CUSTOM STATUS MODAL -->
+    <div class="modal-overlay" id="customModal" aria-hidden="true">
         <div class="modal-box">
+            <button type="button" class="modal-close-x" data-close-modal>&times;</button>
             <div class="modal-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             </div>
             <h3 id="modalTitle">Success</h3>
             <p id="modalMessage">Action completed.</p>
-            <button class="btn btn-primary" id="closeModalBtn" style="width:100%;">Close</button>
+            <button type="button" class="btn btn-primary" id="closeModalBtn" style="width:100%;">Close</button>
         </div>
     </div>
 
-    <!-- EXTERNAL JS -->
+    <!-- INTERACTIVE CAPTIVE PORTAL DEMO MODAL -->
+    <div class="modal-overlay" id="demoModal" aria-hidden="true">
+        <div class="modal-box">
+            <button type="button" class="modal-close-x" data-close-modal>&times;</button>
+            <h3>Try the Customer Captive Portal</h3>
+            <p style="margin-bottom:14px;">Tap a package below to experience how fast your customers buy Wi-Fi via M-Pesa.</p>
+            <div class="demo-phone">
+                <div style="text-align:center;font-weight:800;font-size:0.95rem;margin-bottom:12px;color:#0F172A;">Welcome to YourISP Wi-Fi</div>
+                <div class="demo-pkg selected" data-demo-pkg="1 Hour — KES 20"><span>1 Hour Unlimited</span><strong>KES 20</strong></div>
+                <div class="demo-pkg" data-demo-pkg="6 Hours — KES 50"><span>6 Hours Unlimited</span><strong>KES 50</strong></div>
+                <div class="demo-pkg" data-demo-pkg="24 Hours — KES 100"><span>24 Hours Unlimited</span><strong>KES 100</strong></div>
+                <button type="button" class="btn btn-primary" id="demoPayBtn" style="width:100%;margin-top:6px;padding:11px;">Simulate M-Pesa STK Push</button>
+                <div class="demo-status" id="demoStatus"></div>
+            </div>
+            <a href="register.html" class="btn btn-dark" style="width:100%;">Launch This on Your Router &rarr;</a>
+        </div>
+    </div>
+
+    <!-- ENTERPRISE QUOTE MODAL -->
+    <div class="modal-overlay" id="enterpriseModal" aria-hidden="true">
+        <div class="modal-box" style="text-align:left;">
+            <button type="button" class="modal-close-x" data-close-modal>&times;</button>
+            <span class="badge badge-green" style="margin-bottom:10px;">Enterprise Full Ownership</span>
+            <h3 style="text-align:left;">Request Custom Pricing</h3>
+            <p style="text-align:left;margin-bottom:18px;">Own the complete single-ISP system on your own VPS, domain, and SMS/M-Pesa accounts. Tell us a bit about your setup to get a tailored quote.</p>
+            <form id="enterpriseForm">
+                <div class="form-group">
+                    <label for="entName">Your Name / ISP Name</label>
+                    <input type="text" id="entName" placeholder="e.g. FastNet Kisii" required>
+                </div>
+                <div class="form-group">
+                    <label for="entRouters">Number of Routers / Sites</label>
+                    <input type="text" id="entRouters" placeholder="e.g. 5 MikroTik routers" required>
+                </div>
+                <div class="form-group">
+                    <label for="entNotes">Custom Needs (Optional)</label>
+                    <textarea id="entNotes" rows="2" placeholder="e.g. Need help setting up VPS + custom domain"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Negotiate on WhatsApp &rarr;</button>
+            </form>
+        </div>
+    </div>
+
     <script src="index.js"></script>
 </body>
 </html>

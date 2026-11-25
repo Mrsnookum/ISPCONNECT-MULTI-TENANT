@@ -505,6 +505,7 @@
                 <button class="nav-btn" data-view="ledger"><i data-lucide="receipt" width="17"></i> Revenue Ledger</button>
                 <button class="nav-btn" data-view="broadcast"><i data-lucide="send" width="17"></i> SMS Broadcast</button>
                 <button class="nav-btn" data-view="routers"><i data-lucide="router" width="17"></i> Global Routers <span class="nav-count" id="navRouterCount">0</span></button>
+                <button class="nav-btn" data-view="support"><i data-lucide="headset" width="17"></i> Support Team <span class="nav-count" id="navSupportCount">0</span></button>
                 <button class="nav-btn" data-view="watchdog"><i data-lucide="shield-alert" width="17"></i> Watchdog</button>
                 <button class="nav-btn" data-view="audit"><i data-lucide="file-clock" width="17"></i> Audit Logs</button>
             </nav>
@@ -893,7 +894,150 @@
                     </div>
                 </section>
 
-                <!-- ==================== 6. WATCHDOG VIEW ==================== -->
+                <!-- ==================== 6. SUPPORT TEAM VIEW ==================== -->
+                <section class="view-section" id="view-support">
+                    <div class="page-head">
+                        <div>
+                            <div class="eyebrow">Presence, Productivity &amp; Commissions</div>
+                            <h1 class="page-title">Support <span>Team Desk</span></h1>
+                            <p class="page-sub">Track who is online, time worked today, customers served, shift history, escalations, and payouts.</p>
+                        </div>
+                        <div class="head-controls">
+                            <button class="btn btn-outline" id="testIncidentBtn"><i data-lucide="bell-ring" width="14"></i> Test Failure SMS</button>
+                            <button class="btn btn-outline" id="openAwardCommBtn"><i data-lucide="award" width="14"></i> Award Commission</button>
+                            <button class="btn btn-primary" id="openCreateAgentBtn"><i data-lucide="user-plus" width="14"></i> Add Support Agent</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <div class="card-title"><i data-lucide="users" width="17" color="#2563EB"></i> Support Agents (Live Monitor)</div>
+                                <div class="card-sub">Failure SMS routes to Online agents, falling back to +254 712 153 539 when offline.</div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Agent</th>
+                                        <th>Presence</th>
+                                        <th>Online Today</th>
+                                        <th>Served Today</th>
+                                        <th>Last Login / Logout</th>
+                                        <th>God Mode Controls</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supportAgentsBody">
+                                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No support agents created yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <div class="card-title"><i data-lucide="clock" width="17" color="#F59E0B"></i> Recent Shift Sessions</div>
+                                    <div class="card-sub">Login time, logout time, duration &amp; exit reason</div>
+                                </div>
+                            </div>
+                            <div class="table-wrap">
+                                <table style="min-width:460px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Agent</th>
+                                            <th>Login</th>
+                                            <th>Duration</th>
+                                            <th>Exit Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="supportSessionsBody">
+                                        <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No shifts logged yet.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <div class="card-title"><i data-lucide="alert-triangle" width="17" color="#EF4444"></i> ISP Failure &amp; Escalations</div>
+                                    <div class="card-sub">Incidents flagged by agents during clinical shifts</div>
+                                </div>
+                            </div>
+                            <div class="table-wrap">
+                                <table style="min-width:460px;">
+                                    <thead>
+                                        <tr>
+                                            <th>ISP</th>
+                                            <th>Status</th>
+                                            <th>SMS / Escalation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="supportIncidentsBody">
+                                        <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px;">No failure alerts recorded.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <div class="card-title"><i data-lucide="coins" width="17" color="#00B37E"></i> Commission Payouts</div>
+                                <div class="card-sub">Verify paid ISPs and mark agent commissions paid</div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Agent</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Note</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supportCommsBody">
+                                    <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No commission entries yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <div class="card-title"><i data-lucide="activity" width="17" color="#8B5CF6"></i> Support Agent Activity Logs</div>
+                                <div class="card-sub">Every inquiry reply, incident fix, lead update, and voucher SMS resend</div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Agent</th>
+                                        <th>Action</th>
+                                        <th>Target</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supportAuditBody">
+                                    <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">No support activity logged yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== 7. WATCHDOG VIEW ==================== -->
                 <section class="view-section" id="view-watchdog">
                     <div class="page-head">
                         <div>
@@ -931,7 +1075,7 @@
                     </div>
                 </section>
 
-                <!-- ==================== 7. AUDIT LOGS VIEW ==================== -->
+                <!-- ==================== 8. AUDIT LOGS VIEW ==================== -->
                 <section class="view-section" id="view-audit">
                     <div class="page-head">
                         <div>
@@ -1108,6 +1252,99 @@
                     <button type="submit" class="btn btn-danger" id="dmSubmitBtn">Delete Permanently</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- CUSTOM MODAL: CREATE SUPPORT AGENT -->
+    <div class="modal-backdrop" id="createAgentModal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>Add Support Agent</h3>
+                <button class="modal-close" data-close-modal="createAgentModal"><i data-lucide="x" width="18"></i></button>
+            </div>
+            <form id="createAgentForm">
+                <div class="field">
+                    <label>Full Name</label>
+                    <input type="text" id="caName" placeholder="e.g. Brian Ochieng" required>
+                </div>
+                <div class="field">
+                    <label>Login Email</label>
+                    <input type="email" id="caEmail" placeholder="brian@ispconnect.co.ke" required>
+                </div>
+                <div class="field">
+                    <label>Phone / WhatsApp</label>
+                    <input type="tel" id="caPhone" placeholder="07XXXXXXXX">
+                </div>
+                <div class="field">
+                    <label>Temporary Password (leave blank to auto-generate)</label>
+                    <input type="text" id="caTempPw" placeholder="Auto-generated if empty">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" data-close-modal="createAgentModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="caSubmitBtn">Create Agent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOM MODAL: AWARD COMMISSION -->
+    <div class="modal-backdrop" id="awardCommModal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>Award Agent Commission</h3>
+                <button class="modal-close" data-close-modal="awardCommModal"><i data-lucide="x" width="18"></i></button>
+            </div>
+            <form id="awardCommForm">
+                <div class="field">
+                    <label>Support Agent</label>
+                    <select id="acAgentId" required></select>
+                </div>
+                <div class="field">
+                    <label>Commission Type</label>
+                    <select id="acType">
+                        <option value="cloud_conversion">Cloud ISP Conversion (KES 350–400)</option>
+                        <option value="retention_bonus">Monthly Retention Bonus (KES 100–130)</option>
+                        <option value="enterprise_deal">Enterprise Deal (10–12%)</option>
+                        <option value="bonus">Custom Bonus</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Amount (KES)</label>
+                    <input type="number" step="0.01" min="1" id="acAmount" placeholder="e.g. 400" required>
+                </div>
+                <div class="field">
+                    <label>Status</label>
+                    <select id="acStatus">
+                        <option value="approved">Approved (Ready for Payout)</option>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Already Paid</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Notes (ISP Name / M-Pesa Ref)</label>
+                    <input type="text" id="acNotes" placeholder="e.g. RiftNet Wi-Fi Month 1 paid">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" data-close-modal="awardCommModal">Cancel</button>
+                    <button type="submit" class="btn btn-emerald" id="acSubmitBtn">Record Commission</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOM MODAL: AGENT CREDENTIALS HANDOVER -->
+    <div class="modal-backdrop" id="agentCredsModal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>Agent Login Credentials</h3>
+                <button class="modal-close" data-close-modal="agentCredsModal"><i data-lucide="x" width="18"></i></button>
+            </div>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">Share these login details with your support agent. They will be prompted to set their own password on first login.</p>
+            <div id="agentCredsBox" style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:monospace;font-size:0.82rem;line-height:1.7;white-space:pre-wrap;margin-bottom:14px;"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" data-close-modal="agentCredsModal">Close</button>
+                <button type="button" class="btn btn-primary" id="copyAgentCredsBtn"><i data-lucide="copy" width="14"></i> Copy for WhatsApp</button>
+            </div>
         </div>
     </div>
 

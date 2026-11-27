@@ -150,6 +150,92 @@
             margin-bottom: 22px;
         }
 
+        /* CUSTOM BRANDED PACKAGE LOADER */
+        .pkg-loader-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0 4px;
+            width: 100%;
+        }
+
+        .pkg-spinner-ring {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--primary), var(--accent-blue), transparent 78%);
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+            animation: pkgSpin 0.85s linear infinite;
+        }
+
+        @keyframes pkgSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .pkg-loader-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .pkg-skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .pkg-skeleton-card {
+            position: relative;
+            height: 82px;
+            border-radius: 12px;
+            padding: 10px 8px;
+            border: 1px solid var(--border);
+            background: #F8FAFC;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .pkg-skeleton-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+            transform: translateX(-100%);
+            animation: pkgShimmer 1.35s infinite;
+        }
+
+        .pkg-skeleton-card:nth-child(2)::after { animation-delay: 0.15s; }
+        .pkg-skeleton-card:nth-child(3)::after { animation-delay: 0.3s; }
+
+        @keyframes pkgShimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        .pkg-skel-pill {
+            height: 10px;
+            width: 58%;
+            border-radius: 999px;
+            background: #E2E8F0;
+        }
+
+        .pkg-skel-line {
+            height: 8px;
+            width: 85%;
+            border-radius: 999px;
+            background: #E2E8F0;
+        }
+
+        .pkg-skel-line.short {
+            width: 52%;
+        }
+
         .pkg-btn {
             position: relative;
             display: flex;
@@ -476,7 +562,27 @@
                 <!-- 1. PACKAGES -->
                 <div class="section-heading">Choose Your Package</div>
                 <div class="package-grid" id="packagesContainer">
-                    <div style="text-align: center; color: var(--text-muted); font-size: 0.84rem; padding: 18px 0;">Loading packages...</div>
+                    <div class="pkg-loader-wrap" aria-live="polite" aria-label="Loading packages">
+                        <div class="pkg-spinner-ring"></div>
+                        <div class="pkg-loader-text">Fetching the best plans for you...</div>
+                        <div class="pkg-skeleton-grid">
+                            <div class="pkg-skeleton-card">
+                                <div class="pkg-skel-pill"></div>
+                                <div class="pkg-skel-line"></div>
+                                <div class="pkg-skel-line short"></div>
+                            </div>
+                            <div class="pkg-skeleton-card">
+                                <div class="pkg-skel-pill"></div>
+                                <div class="pkg-skel-line"></div>
+                                <div class="pkg-skel-line short"></div>
+                            </div>
+                            <div class="pkg-skeleton-card">
+                                <div class="pkg-skel-pill"></div>
+                                <div class="pkg-skel-line"></div>
+                                <div class="pkg-skel-line short"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 2. M-PESA PAYMENT -->

@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const companyName = localStorage.getItem("companyName");
 
     if (!adminName || !ispToken) {
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
         return;
     }
 
@@ -60,14 +60,14 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("adminName");
         localStorage.removeItem("isp_token");
         localStorage.removeItem("companyName");
-        window.location.href = '/register.html?view=login';
+        window.location.href = 'register.html?view=login';
     });
 
     function checkAuthError(res) {
         if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("adminName");
             localStorage.removeItem("isp_token");
-            window.location.href = '/register.html?view=login';
+            window.location.href = 'register.html?view=login';
             return true;
         }
         return false;
@@ -127,12 +127,143 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${r.identity}</td>
                     <td>${r.ip_address || 'Unknown'}</td>
                     <td><span class="badge" style="padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; background: ${r.status === 'Online' ? 'var(--primary-light)' : '#FEE2E2'}; color: ${r.status === 'Online' ? 'var(--primary)' : '#EF4444'};">${r.status}</span></td>
-                    <td><button class="btn btn-sm action-btn" style="padding: 4px 8px; border: 1px solid #E2E8F0; background: transparent; border-radius: 4px; cursor: pointer; color: var(--text-dark); transition: all 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='transparent'">Manage</button></td>
+                    <td style="text-align: right;"><button class="btn btn-sm action-btn btn-manage-router" data-id="${r.id}" style="padding: 4px 10px; border: 1px solid #E2E8F0; background: transparent; border-radius: 6px; cursor: pointer; color: var(--text-dark); font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='transparent'">Manage</button></td>
                 </tr>
             `).join('');
+
+            tbody.querySelectorAll('.btn-manage-router').forEach(btn => {
+                btn.addEventListener('click', () => openManageModal(btn.dataset.id));
+            });
         }
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
+
+    // --- MANAGE ROUTER MODAL LOGIC ---
+    let activeRouter = null;
+    let deleteConfirmArmed = false;
+
+    function openManageModal(routerId) {
+        activeRouter = allRouters.find(r => r.id === routerId);
+        if (!activeRouter) return;
+        deleteConfirmArmed = false;
+
+        document.getElementById('manageModalTitle').textContent = activeRouter.name || activeRouter.identity;
+        const statusEl = document.getElementById('m-status');
+        statusEl.textContent = activeRouter.status || 'Unknown';
+        statusEl.style.color = activeRouter.status === 'Online' ? 'var(--primary)' : '#EF4444';
+        document.getElementById('m-lastseen').textContent = activeRouter.last_seen_at
+            ? new Date(activeRouter.last_seen_at).toLocaleString('en-KE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : 'Never';
+        document.getElementById('m-wgip').textContent = activeRouter.wg_ip || 'Not assigned';
+        document.getElementById('m-wanip').textContent = activeRouter.ip_address || 'Unknown';
+        document.getElementById('m-input-name').value = activeRouter.name || activeRouter.identity || '';
+        document.getElementById('m-input-location').value = activeRouter.location || '';
+
+        const toggle = document.getElementById('toggleRemoteWinbox');
+        const addrBox = document.getElementById('winboxAddrBox');
+        const addrText = document.getElementById('winboxAddrText');
+        const delBtn = document.getElementById('btnDeleteRouter');
+        if (delBtn) delBtn.innerHTML = `<i data-lucide="trash-2" width="14"></i> Unlink Router`;
+
+        toggle.checked = !!activeRouter.remote_access_enabled;
+        if (activeRouter.remote_access_enabled && activeRouter.remote_port) {
+            addrText.textContent = `212.95.56.131:${activeRouter.remote_port}`;
+            addrBox.style.display = 'flex';
+        } else {
+            addrBox.style.display = 'none';
+        }
+
+        document.getElementById('manageModal').classList.add('active');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    document.getElementById('btnCloseManage')?.addEventListener('click', () => {
+        document.getElementById('manageModal').classList.remove('active');
+    });
+
+    document.getElementById('toggleRemoteWinbox')?.addEventListener('change', async (e) => {
+        if (!activeRouter) return;
+        const enabled = e.target.checked;
+        e.target.disabled = true;
+        try {
+            const res = await fetch(`${API_BASE}/api/provision/routers/${activeRouter.id}/remote-access`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ispToken}` },
+                body: JSON.stringify({ enabled })
+            });
+            if (checkAuthError(res)) return;
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Failed to toggle remote access');
+
+            activeRouter.remote_access_enabled = data.enabled;
+            const addrBox = document.getElementById('winboxAddrBox');
+            document.getElementById('winboxAddrText').textContent = data.winbox_address;
+            addrBox.style.display = data.enabled ? 'flex' : 'none';
+            showToast(data.enabled ? `Remote WinBox enabled (${data.winbox_address})` : 'Remote WinBox disabled');
+        } catch (err) {
+            e.target.checked = !enabled;
+            showToast(err.message, 'error');
+        } finally {
+            e.target.disabled = false;
+        }
+    });
+
+    document.getElementById('btnCopyWinbox')?.addEventListener('click', () => {
+        const addr = document.getElementById('winboxAddrText').textContent;
+        navigator.clipboard.writeText(addr).then(() => showToast(`Copied ${addr}`));
+    });
+
+    document.getElementById('formManageRouter')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!activeRouter) return;
+        const btn = document.getElementById('btnSaveRouter');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        try {
+            const res = await fetch(`${API_BASE}/api/provision/routers/${activeRouter.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ispToken}` },
+                body: JSON.stringify({
+                    name: document.getElementById('m-input-name').value.trim(),
+                    location: document.getElementById('m-input-location').value.trim()
+                })
+            });
+            if (checkAuthError(res)) return;
+            if (!res.ok) throw new Error('Failed to update router');
+            showToast('Router details saved');
+            document.getElementById('manageModal').classList.remove('active');
+            loadDashboardRouters();
+        } catch (err) {
+            showToast(err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
+        }
+    });
+
+    document.getElementById('btnDeleteRouter')?.addEventListener('click', async () => {
+        if (!activeRouter) return;
+        const btn = document.getElementById('btnDeleteRouter');
+        if (!deleteConfirmArmed) {
+            deleteConfirmArmed = true;
+            btn.innerHTML = `<i data-lucide="alert-triangle" width="14"></i> Click again to confirm`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE}/api/provision/routers/${activeRouter.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${ispToken}` }
+            });
+            if (checkAuthError(res)) return;
+            if (!res.ok) throw new Error('Failed to unlink router');
+            showToast('Router unlinked');
+            document.getElementById('manageModal').classList.remove('active');
+            loadDashboardRouters();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    });
 
     const filterTabs = document.querySelectorAll('.filter-tabs .filter-btn');
     filterTabs.forEach(btn => {

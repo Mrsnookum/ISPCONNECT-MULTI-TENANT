@@ -133,6 +133,39 @@
         .spinner { width: 20px; height: 20px; border: 3px solid #CBD5E1; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* MANAGE ROUTER MODAL */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.55); backdrop-filter: blur(4px); z-index: 9990; display: none; align-items: center; justify-content: center; padding: 16px; }
+        .modal-backdrop.active { display: flex; }
+        .manage-modal { background: var(--card-bg); border-radius: 16px; max-width: 520px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; animation: modalIn 0.2s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .manage-header { padding: 18px 22px; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; }
+        .manage-header h2 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .manage-close { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; }
+        .manage-close:hover { background: #F1F5F9; color: var(--text-dark); }
+        .manage-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 18px; max-height: 80vh; overflow-y: auto; }
+
+        .diag-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .diag-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 12px; }
+        .diag-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+        .diag-val { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); font-family: monospace; }
+
+        .winbox-card { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+        .winbox-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #CBD5E1; border-radius: 99px; transition: 0.25s; }
+        .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.25s; }
+        .switch input:checked + .slider { background: var(--primary); }
+        .switch input:checked + .slider::before { transform: translateX(20px); }
+
+        .winbox-addr-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #0F172A; color: #10B981; padding: 10px 12px; border-radius: 8px; font-family: monospace; font-size: 0.85rem; }
+        .manage-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .manage-input { width: 100%; padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 0.85rem; outline: none; }
+        .manage-input:focus { border-color: var(--blue); }
+        .danger-zone { border-top: 1px solid #FEE2E2; padding-top: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .btn-danger-outline { background: #FEF2F2; color: #EF4444; border: 1px solid #FECACA; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-danger-outline:hover { background: #EF4444; color: #fff; }
+
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; }
             .sidebar.open { left: 0; }
@@ -416,6 +449,68 @@
 
         </div>
     </main>
+
+    <!-- MANAGE ROUTER MODAL -->
+    <div class="modal-backdrop" id="manageModal">
+        <div class="manage-modal">
+            <div class="manage-header">
+                <h2><i data-lucide="hard-drive" width="18" color="var(--blue)"></i> <span id="manageModalTitle">Manage Router</span></h2>
+                <button class="manage-close" id="btnCloseManage"><i data-lucide="x" width="20"></i></button>
+            </div>
+            <div class="manage-body">
+                <!-- Diagnostics -->
+                <div class="diag-grid">
+                    <div class="diag-box"><div class="diag-label">Status</div><div class="diag-val" id="m-status">--</div></div>
+                    <div class="diag-box"><div class="diag-label">Last Seen</div><div class="diag-val" id="m-lastseen">--</div></div>
+                    <div class="diag-box"><div class="diag-label">WireGuard IP</div><div class="diag-val" id="m-wgip">--</div></div>
+                    <div class="diag-box"><div class="diag-label">WAN IP</div><div class="diag-val" id="m-wanip">--</div></div>
+                </div>
+
+                <!-- Remote WinBox -->
+                <div class="winbox-card">
+                    <div class="winbox-top">
+                        <div>
+                            <div style="font-size:0.88rem;font-weight:700;">Remote WinBox Access</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);">Tunnel straight to port 8291 over WireGuard.</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleRemoteWinbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="winbox-addr-row" id="winboxAddrBox" style="display:none;">
+                        <span id="winboxAddrText">212.95.56.131:10003</span>
+                        <button type="button" class="btn-copy" id="btnCopyWinbox" style="padding:6px;" title="Copy WinBox Address">
+                            <i data-lucide="copy" width="15"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Rename & Location -->
+                <form id="formManageRouter" style="display:flex;flex-direction:column;gap:10px;">
+                    <div class="manage-form-grid">
+                        <div>
+                            <label style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Router Name</label>
+                            <input type="text" id="m-input-name" class="manage-input" required>
+                        </div>
+                        <div>
+                            <label style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Site / Location</label>
+                            <input type="text" id="m-input-location" class="manage-input" placeholder="e.g. Kisii Town">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btnSaveRouter" style="width:100%;padding:10px;">Save Changes</button>
+                </form>
+
+                <!-- Delete / Unlink -->
+                <div class="danger-zone">
+                    <div style="font-size:0.76rem;color:var(--text-muted);">Remove this router from your dashboard.</div>
+                    <button type="button" class="btn-danger-outline" id="btnDeleteRouter">
+                        <i data-lucide="trash-2" width="14"></i> Unlink Router
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="toast-container" id="toastContainer"></div>
     <script src="mikrotik.js"></script>

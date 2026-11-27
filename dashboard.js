@@ -309,7 +309,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 const uptimeEl = document.getElementById('router-uptime');
                 const hotspotEl = document.getElementById('hotspot-users');
                 const radiusEl = document.getElementById('radius-uptime');
-                if (uptimeEl) uptimeEl.textContent = data.router.main_uptime;
+                if (uptimeEl) {
+                    const uptimeText = String(data.router.main_uptime || '0 / 0 Online');
+                    uptimeEl.textContent = uptimeText;
+
+                    // Dynamically flip the "• Online" / "• Offline" badge above #router-uptime
+                    const statusBadge = uptimeEl.previousElementSibling;
+                    if (statusBadge) {
+                        const match = uptimeText.match(/^(\d+)/);
+                        const onlineCount = match ? parseInt(match[1], 10) : 0;
+                        const isOnline = onlineCount > 0;
+                        statusBadge.style.color = isOnline ? '#00B37E' : '#EF4444';
+                        statusBadge.innerHTML = `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${isOnline ? '#00B37E' : '#EF4444'};margin-right:5px;vertical-align:middle;"></span>${isOnline ? 'Online' : 'Offline'}`;
+                    }
+                }
                 if (hotspotEl) hotspotEl.textContent = data.router.hotspot_active;
                 if (radiusEl) radiusEl.textContent = data.router.radius_uptime;
             }

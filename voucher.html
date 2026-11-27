@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Vouchers | ISPConnect</title>
+    <link rel="icon" type="image/jpeg" sizes="32x32" href="favicon.jpg">
+    <link rel="icon" type="image/jpeg" sizes="192x192" href="favicon.jpg">
+    <link rel="apple-touch-icon" href="favicon.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00B37E; --primary-light: #E6F7F2;
+            --blue: #007BFF; --blue-light: #E6F2FF;
+            --purple: #7C3AED; --purple-light: #F3E8FF;
+            --amber: #D97706; --amber-light: #FEF3C7;
+            --red: #EF4444; --red-light: #FEE2E2;
+            --text-dark: #1E293B; --text-muted: #64748B;
+            --bg: #F8FAFC; --card-bg: #FFFFFF; --border: #E2E8F0;
+            --sidebar-width: 260px;
+            --shadow-sm: 0 1px 3px rgba(15,23,42,0.04);
+            --shadow-md: 0 4px 12px rgba(15,23,42,0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR & HEADER */
+        .sidebar { width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 20px; z-index: 50; transition: left 0.3s ease; flex-shrink: 0; }
+        .logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 32px; padding: 0 8px; }
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+        .nav-item:hover { background: #F8FAFC; color: var(--text-dark); }
+        .nav-item.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+
+        .upgrade-card { background: linear-gradient(180deg, #022C22 0%, #064E3B 100%); border-radius: 12px; padding: 20px; color: #fff; margin-top: auto; position: relative; overflow: hidden; }
+        .upgrade-card::before { content: ''; position: absolute; top: -20px; left: -20px; right: -20px; height: 80px; background: radial-gradient(circle, rgba(0,179,126,0.3) 0%, transparent 70%); }
+        .upgrade-card h4, .upgrade-card p, .btn-upgrade { position: relative; z-index: 2; }
+        .upgrade-card h4 { font-size: 0.95rem; margin: 12px 0 6px; font-weight: 600; }
+        .upgrade-card p { font-size: 0.75rem; color: #A7F3D0; margin-bottom: 16px; line-height: 1.4; }
+        .btn-upgrade { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: space-between; align-items: center; text-decoration: none; }
+
+        .mobile-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 40; display: none; backdrop-filter: blur(2px); }
+        .mobile-overlay.active { display: block; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; position: relative; }
+
+        .header { background: var(--bg); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; gap: 16px; border-bottom: 1px solid rgba(226,232,240,0.6); }
+        .mobile-toggle { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-dark); padding: 4px; }
+        .header-profile { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+        .profile-dropdown-container { position: relative; display: inline-block; }
+        .profile-btn { display: flex; align-items: center; gap: 10px; background: transparent; border: none; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
+        .profile-btn:hover { background: #E2E8F0; }
+        .avatar { width: 34px; height: 34px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem; flex-shrink: 0; }
+        .profile-info { text-align: left; }
+        .profile-name { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); }
+        .profile-role { font-size: 0.7rem; color: var(--text-muted); }
+        .profile-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; width: 200px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-md); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 100; padding: 6px 0; }
+        .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; width: 100%; border: none; background: transparent; color: var(--text-dark); font-size: 0.85rem; font-weight: 500; cursor: pointer; text-align: left; }
+        .dropdown-item:hover { background: #F8FAFC; }
+        .dropdown-item.text-red { color: var(--red); }
+
+        /* CONTAINER */
+        .dashboard-container { padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 20px; max-width: 1250px; margin: 0 auto; width: 100%; }
+        .page-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+        .page-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); margin-bottom: 4px; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .page-header p { color: var(--text-muted); font-size: 0.85rem; }
+        .btn-refresh { background: var(--blue); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+
+        /* KPI GRID */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 12px; min-width: 0; }
+        .kpi-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .kpi-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .kpi-icon.green { background: var(--primary-light); color: var(--primary); }
+        .kpi-icon.blue { background: var(--blue-light); color: var(--blue); }
+        .kpi-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .kpi-icon.amber { background: var(--amber-light); color: var(--amber); }
+        .kpi-tag { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+        .kpi-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+        .kpi-value { font-size: 1.35rem; font-weight: 700; color: var(--text-dark); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kpi-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* CARDS & FORMS */
+        .card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap; }
+        .card-title { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-dark); }
+        .card-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+        .info-banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 10px; background: var(--primary-light); color: #065F46; font-size: 0.8rem; font-weight: 500; line-height: 1.4; margin-bottom: 16px; border: 1px solid #A7F3D0; }
+
+        .voucher-form-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr auto; gap: 12px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .form-group label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+        .form-group input, .form-group select { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: var(--card-bg); color: var(--text-dark); height: 43px; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
+
+        /* CUSTOM PACKAGE DROPDOWN */
+        .custom-select { position: relative; width: 100%; }
+        .custom-select-trigger {
+            width: 100%; height: 43px; padding: 0 14px;
+            border: 1px solid var(--border); border-radius: 10px;
+            background: var(--card-bg); color: var(--text-dark);
+            font-size: 0.88rem; font-weight: 500;
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+            text-align: left;
+        }
+        .custom-select-trigger:hover { border-color: #CBD5E1; }
+        .custom-select.open .custom-select-trigger { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.12); }
+        .custom-select-trigger .chevron { color: var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+        .custom-select.open .custom-select-trigger .chevron { transform: rotate(180deg); color: var(--blue); }
+
+        .custom-select-menu {
+            position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; box-shadow: 0 12px 28px rgba(15,23,42,0.12);
+            padding: 6px; z-index: 200; max-height: 240px; overflow-y: auto;
+            opacity: 0; visibility: hidden; transform: translateY(-6px);
+            transition: all 0.18s ease;
+        }
+        .custom-select.open .custom-select-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .custom-option {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            font-size: 0.84rem; color: var(--text-dark); transition: background 0.15s;
+        }
+        .custom-option:hover { background: #F1F5F9; }
+        .custom-option.selected { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+        .custom-option-meta { font-size: 0.74rem; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+        .custom-option.selected .custom-option-meta { color: var(--blue); }
+
+        .sms-toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 0.82rem; color: var(--text-dark); font-weight: 500; cursor: pointer; width: fit-content; }
+        .sms-toggle-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+        .btn-primary { background: var(--blue); color: #fff; border: none; padding: 12px 22px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; height: 43px; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
+        .btn-green { background: var(--primary); }
+        .btn-green:hover { background: #00996B; }
+        .btn-danger { background: var(--red); }
+        .btn-danger:hover { background: #DC2626; }
+
+        /* GENERATED VOUCHER BANNER */
+        .generated-banner { display: none; margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: #F8FAFC; border: 1.5px dashed var(--primary); align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        .generated-banner.show { display: flex; }
+        .gen-code-display { font-family: monospace; font-size: 1.35rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-dark); background: #FFFFFF; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); }
+
+        /* TOOLBAR & TABLE */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .filter-btn { padding: 6px 12px; border-radius: 99px; border: 1px solid var(--border); background: transparent; font-size: 0.76rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        .filter-btn.active { background: var(--text-dark); color: #fff; border-color: var(--text-dark); }
+        .search-box { display: flex; align-items: center; gap: 8px; background: #F8FAFC; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); width: 100%; max-width: 280px; }
+        .search-box input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.82rem; color: var(--text-dark); }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid #F1F5F9; text-transform: uppercase; }
+        td { padding: 13px 12px; font-size: 0.84rem; color: var(--text-dark); border-bottom: 1px solid #F8FAFC; vertical-align: middle; }
+        .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .status-active { background: var(--primary-light); color: var(--primary); }
+        .status-expired { background: var(--red-light); color: var(--red); }
+        .code-pill { background: #F1F5F9; padding: 4px 9px; border-radius: 6px; font-family: monospace; font-weight: 700; font-size: 0.8rem; border: 1px solid var(--border); letter-spacing: 0.04em; }
+        .action-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; font-weight: 600; }
+        .action-btn:hover { background: #F1F5F9; color: var(--blue); }
+        .action-btn.revoke:hover { background: var(--red-light); color: var(--red); }
+
+        /* CUSTOM MODAL */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 9990; display: none; align-items: center; justify-content: center; padding: 16px; }
+        .modal-backdrop.active { display: flex; }
+        .modal-box { background: var(--card-bg); border-radius: 16px; max-width: 400px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: center; }
+        .modal-icon { width: 50px; height: 50px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+        .modal-box h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .modal-box p { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .btn-secondary { background: #F1F5F9; color: var(--text-dark); border: 1px solid var(--border); padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+
+        /* TOAST & SPIN */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; max-width: 360px; }
+        .toast { background: #1E293B; color: #fff; padding: 14px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; font-weight: 500; opacity: 0; transform: translateY(16px); transition: all 0.3s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { border-left: 4px solid var(--red); }
+        .toast.success { border-left: 4px solid var(--primary); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .voucher-form-grid { grid-template-columns: 1fr 1fr; }
+            .voucher-form-grid .btn-primary { grid-column: 1 / -1; width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; }
+            .sidebar.open { left: 0; }
+            .mobile-toggle { display: block; }
+            .header { padding: 12px 16px; }
+            .dashboard-container { padding: 16px 14px 32px; gap: 16px; }
+            .page-header h1 { font-size: 1.3rem; }
+            .kpi-grid { gap: 10px; }
+            .kpi-card { padding: 14px 12px; gap: 10px; }
+            .kpi-value { font-size: 1.15rem; }
+            .card { padding: 16px; }
+            .voucher-form-grid { grid-template-columns: 1fr; }
+            .search-box { max-width: none; }
+            .toast-container { left: 14px; right: 14px; bottom: 14px; max-width: none; }
+
+            table, thead, tbody, th, td, tr { display: block; width: 100%; }
+            thead { display: none; }
+            tbody tr { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--card-bg); }
+            tbody td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid #F1F5F9; font-size: 0.82rem; }
+            tbody td:last-child { border-bottom: none; padding-bottom: 0; }
+            tbody td::before { content: attr(data-label); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); flex-shrink: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo"><i data-lucide="wifi" stroke-width="3"></i> <span id="sidebar-logo-text">ISPConnect</span></div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i data-lucide="home" width="18"></i> Dashboard</a>
+            <a href="mikrotik.html" class="nav-item"><i data-lucide="hard-drive" width="18"></i> MikroTik</a>
+            <a href="customers.html" class="nav-item"><i data-lucide="users" width="18"></i> Customers</a>
+            <a href="packages.html" class="nav-item"><i data-lucide="package" width="18"></i> Packages</a>
+            <a href="voucher.html" class="nav-item active"><i data-lucide="ticket" width="18"></i> Vouchers</a>
+            <a href="payments.html" class="nav-item"><i data-lucide="file-text" width="18"></i> Payments</a>
+            <a href="subscriptions.html" class="nav-item"><i data-lucide="refresh-cw" width="18"></i> Subscriptions</a>
+            <a href="sessions.html" class="nav-item"><i data-lucide="monitor-play" width="18"></i> Sessions</a>
+            <a href="reports.html" class="nav-item"><i data-lucide="bar-chart-2" width="18"></i> Reports</a>
+            <a href="sms.html" class="nav-item"><i data-lucide="message-square" width="18"></i> SMS</a>
+            <a href="settings.html" class="nav-item"><i data-lucide="settings" width="18"></i> Settings</a>
+        </nav>
+        <div class="upgrade-card">
+            <i data-lucide="wifi" style="color: var(--primary); margin-bottom: 4px;"></i>
+            <h4>Fast. Reliable.<br>Connected.</h4>
+            <p>Powering your internet business with smart billing solutions.</p>
+            <a href="payments.html" class="btn-upgrade">Renew Plan <i data-lucide="arrow-right" width="14"></i></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <button class="mobile-toggle" id="mobileToggle"><i data-lucide="menu"></i></button>
+            <div class="header-profile">
+                <div class="profile-dropdown-container">
+                    <button class="profile-btn" id="profileToggleBtn">
+                        <div class="avatar" id="navAvatar">--</div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="navName">Loading...</div>
+                            <div class="profile-role" id="navCompany">Administrator</div>
+                        </div>
+                        <i data-lucide="chevron-down" width="16" color="#94A3B8"></i>
+                    </button>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="dropdown-item text-red" id="logoutBtn"><i data-lucide="log-out" width="16"></i> Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <div class="page-top">
+                <div class="page-header">
+                    <div class="page-eyebrow">Cash & Complimentary Access</div>
+                    <h1>Manual Vouchers</h1>
+                    <p>Issue instant Wi-Fi vouchers for cash payments, promos, or support without affecting M-Pesa revenue.</p>
+                </div>
+                <button class="btn-refresh" id="btnRefreshVouchers"><i data-lucide="refresh-cw" width="15"></i> Refresh</button>
+            </div>
+
+            <!-- 4-CARD KPI GRID -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon blue"><i data-lucide="ticket" width="18"></i></div>
+                        <span class="kpi-tag">Total</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Vouchers Issued</div>
+                        <div class="kpi-value" id="kpi-total">0</div>
+                        <div class="kpi-sub">Manual vouchers created</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon green"><i data-lucide="check-circle-2" width="18"></i></div>
+                        <span class="kpi-tag">Live</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Active Vouchers</div>
+                        <div class="kpi-value" id="kpi-active">0</div>
+                        <div class="kpi-sub">Valid & ready to use</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon amber"><i data-lucide="clock" width="18"></i></div>
+                        <span class="kpi-tag">Ended</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Expired / Revoked</div>
+                        <div class="kpi-value" id="kpi-expired">0</div>
+                        <div class="kpi-sub">Disconnected automatically</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <div class="kpi-icon purple"><i data-lucide="shield-check" width="18"></i></div>
+                        <span class="kpi-tag">Zero Fee</span>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Wallet Fee Impact</div>
+                        <div class="kpi-value">KES 0.00</div>
+                        <div class="kpi-sub">Excluded from M-Pesa ledger</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GENERATE VOUCHER CARD -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title"><i data-lucide="plus-circle" width="18"></i> Generate Manual Voucher</h2>
+                        <div class="card-subtitle">Select a package to mint an instant FreeRADIUS voucher code with automatic expiry enforcement.</div>
+                    </div>
+                </div>
+
+                <div class="info-banner">
+                    <i data-lucide="info" width="18" style="flex-shrink: 0; margin-top: 1px;"></i>
+                    <span>Manual vouchers add <strong>KES 0</strong> to your M-Pesa revenue reports and deduct <strong>KES 0</strong> from your Payment Wallet. Speed, device limits, and auto-expiry are enforced identically to paid vouchers.</span>
+                </div>
+
+                <form id="formGenerateVoucher">
+                    <div class="voucher-form-grid">
+                        <div class="form-group">
+                            <label>Wi-Fi Package</label>
+                            <input type="hidden" id="voucherPackageSelect" value="">
+                            <div class="custom-select" id="customPackageSelect">
+                                <button type="button" class="custom-select-trigger" id="customPackageTrigger">
+                                    <span id="customPackageLabel" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Loading packages...</span>
+                                    <i data-lucide="chevron-down" width="16" class="chevron"></i>
+                                </button>
+                                <div class="custom-select-menu" id="customPackageMenu">
+                                    <div style="padding:12px;text-align:center;font-size:0.8rem;color:var(--text-muted);">Loading packages...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Phone (Optional)</label>
+                            <input type="tel" id="voucherPhoneInput" placeholder="e.g. 0712345678">
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Name / Note</label>
+                            <input type="text" id="voucherNameInput" placeholder="e.g. Cash Customer / Promo">
+                        </div>
+                        <button type="submit" class="btn-primary btn-green" id="btnGenerateVoucher">
+                            <i data-lucide="sparkles" width="16"></i> Generate Voucher
+                        </button>
+                    </div>
+
+                    <label class="sms-toggle-row">
+                        <input type="checkbox" id="voucherSendSms" checked>
+                        <span>Send voucher code via SMS if phone number is provided</span>
+                    </label>
+                </form>
+
+                <!-- INSTANT RESULT BANNER -->
+                <div class="generated-banner" id="generatedBanner">
+                    <div>
+                        <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 4px;">Voucher Ready</div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span class="gen-code-display" id="generatedCodeText">------</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);" id="generatedMetaText"></span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-primary" id="btnCopyGenerated" style="height: 38px; padding: 0 16px; font-size: 0.82rem;">
+                        <i data-lucide="copy" width="15"></i> Copy Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- ISSUED VOUCHERS TABLE -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title"><i data-lucide="list" width="18"></i> Issued Manual Vouchers</h2>
+                        <div class="card-subtitle">Track active cash/promo vouchers or revoke access immediately on the router.</div>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="filter-tabs">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="active">Active</button>
+                        <button class="filter-btn" data-filter="expired">Expired</button>
+                    </div>
+                    <div class="search-box">
+                        <i data-lucide="search" width="15" color="#94A3B8"></i>
+                        <input type="text" id="searchVouchers" placeholder="Search code, phone, package...">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Voucher Code</th>
+                                <th>Package</th>
+                                <th>Customer / Phone</th>
+                                <th>Created</th>
+                                <th>Expires</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vouchers-tbody">
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading vouchers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- REVOKE CONFIRMATION MODAL -->
+    <div class="modal-backdrop" id="revokeModal">
+        <div class="modal-box">
+            <div class="modal-icon"><i data-lucide="ban" width="24"></i></div>
+            <h3>Revoke Voucher?</h3>
+            <p id="revokeModalText">This will immediately disable the voucher in FreeRADIUS and disconnect any active device on the router.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="btnCancelRevoke">Cancel</button>
+                <button type="button" class="btn-primary btn-danger" id="btnConfirmRevoke" style="height: 40px;">Revoke Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="voucher.js"></script>
+    <script src="guard.js"></script>
+</body>
+</html>

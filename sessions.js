@@ -143,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const filteredData = allSessions.filter(s => {
             const isLive = !s.acctstoptime;
             if (currentFilter === 'active' && !isLive) return false;
+            if (currentFilter === 'fup' && !s.fup_throttled) return false;
             
             const username = (s.username || '').toLowerCase();
             const ip = (s.framedipaddress || '').toLowerCase();
@@ -158,30 +159,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.innerHTML = filteredData.map(s => {
             const isLive = !s.acctstoptime;
+            const isFup = Boolean(s.fup_throttled);
             const statusClass = isLive ? 'status-live' : 'status-closed';
             const statusText = isLive ? 'LIVE' : 'CLOSED';
             
             const username = s.username || 'Anonymous';
+            const encodedUser = encodeURIComponent(username);
             const ip = s.framedipaddress || 'No IP';
             const mac = s.callingstationid || 'No MAC';
             
             const upload = formatBytes(s.acctinputoctets);
             const download = formatBytes(s.acctoutputoctets);
+
+            const fupBadge = isFup ? `<span class="fup-badge">FUP</span>` : '';
             
-            let actions = '';
+            const actionButtons = [];
+            if (isFup && s.username) {
+                actionButtons.push(`
+                    <button class="action-btn-fup" onclick="resetUserFup('${encodedUser}')" title="Restore full speed">
+                        <i data-lucide="rotate-ccw" width="14"></i> Reset FUP
+                    </button>
+                `);
+            }
             if (isLive) {
-                actions = `
+                actionButtons.push(`
                     <button class="action-btn" onclick="terminateSession('${s.radacctid || s.id}')">
                         <i data-lucide="power" width="14"></i> Disconnect
                     </button>
-                `;
-            } else {
-                actions = `<span style="font-size: 0.75rem; color: var(--text-muted);">Session Ended</span>`;
+                `);
             }
+
+            const actions = actionButtons.length > 0
+                ? `<div class="actions-wrap">${actionButtons.join('')}</div>`
+                : `<span style="font-size: 0.75rem; color: var(--text-muted);">Session Ended</span>`;
 
             return `
                 <tr>
-                    <td><span class="code-pill">${username}</span></td>
+                    <td><span class="code-pill">${username}</span>${fupBadge}</td>
                     <td>
                         <div style="font-weight: 600; color: var(--text-dark);">${ip}</div>
                         <div style="font-size: 0.7rem; color: var(--text-muted); font-family: monospace;">${mac}</div>
@@ -213,6 +227,30 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
     document.getElementById('searchSessions').addEventListener('input', renderSessions);
+
+    // Reset FUP Action
+    window.resetUserFup = async function(encodedUsername) {
+        const username = decodeURIComponent(encodedUsername);
+        try {
+            const res = await fetch(`${API_BASE}/sessions/${encodedUsername}/reset-fup`, {
+                method: 'POST',
+                headers: { "Authorization": `Bearer ${ispToken}` }
+            });
+            
+            if (checkAuthError(res)) return;
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || "Failed to reset FUP");
+            }
+            
+            const data = await res.json();
+            showToast(`FUP reset for ${username}${data.coa_ack ? ' (Live speed restored)' : ''}.`, "success");
+            loadSessions();
+        } catch (err) {
+            console.error(err);
+            showToast(err.message || "Failed to reset FUP for user.", "error");
+        }
+    };
 
     // Disconnect Action
     window.terminateSession = async function(sessionId) {

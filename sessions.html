@@ -81,7 +81,7 @@
         .kpi-val { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); }
 
         .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0; flex-wrap: wrap; gap: 12px; }
-        .filter-tabs { display: flex; gap: 8px; }
+        .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .filter-btn { padding: 6px 12px; border-radius: 99px; border: 1px solid #E2E8F0; background: transparent; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
         .filter-btn.active { background: var(--text-dark); color: #fff; border-color: var(--text-dark); }
         
@@ -97,12 +97,17 @@
         .status-closed { background: #F1F5F9; color: var(--text-muted); }
         .status-closed .dot { background: var(--text-muted); }
 
+        .fup-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 7px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; background: #FFF7ED; color: #EA580C; border: 1px solid #FED7AA; }
+
         .code-pill { background: var(--blue-light); padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: 600; color: var(--blue); font-size: 0.75rem; border: 1px solid #BAE6FD; }
         .data-usage { font-size: 0.75rem; font-weight: 500; color: var(--text-dark); display: flex; gap: 8px; }
         .data-usage span { color: var(--text-muted); font-size: 0.7rem; }
         
+        .actions-wrap { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; }
         .action-btn { background: #FEF2F2; border: 1px solid #FCA5A5; color: #EF4444; cursor: pointer; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
         .action-btn:hover { background: #EF4444; color: #fff; }
+        .action-btn-fup { background: #FFF7ED; border: 1px solid #FDBA74; color: #EA580C; cursor: pointer; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+        .action-btn-fup:hover { background: #EA580C; color: #fff; }
 
         /* TOAST NOTIFICATION */
         .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 9999; }
@@ -219,6 +224,7 @@
                 <div class="toolbar">
                     <div class="filter-tabs">
                         <button class="filter-btn active" data-filter="active">Active Sessions</button>
+                        <button class="filter-btn" data-filter="fup">FUP Throttled</button>
                         <button class="filter-btn" data-filter="all">All Telemetry</button>
                     </div>
                     <div class="search-container" style="max-width: 250px; padding: 8px 12px; display: flex;">

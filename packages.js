@@ -127,14 +127,73 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${kbps}K`;
     }
 
+    function parseRatePartToMbps(part) {
+        if (!part) return '';
+        const clean = part.trim().toLowerCase();
+        const num = parseFloat(clean);
+        if (isNaN(num)) return '';
+        if (clean.endsWith('m')) return parseFloat(num.toFixed(2));
+        if (clean.endsWith('k')) return parseFloat((num / 1024).toFixed(2));
+        return parseFloat((num / 1048576).toFixed(2));
+    }
+
+    function formatRateLimitDisplay(rateStr) {
+        if (!rateStr || !rateStr.includes('/')) return rateStr || '';
+        const [up, down] = rateStr.split('/');
+        const upMbps = parseRatePartToMbps(up);
+        const downMbps = parseRatePartToMbps(down);
+        if (upMbps === '' || downMbps === '') return rateStr;
+        return `${formatSpeed(Math.round(upMbps * 1024))}/${formatSpeed(Math.round(downMbps * 1024))}`;
+    }
+
     function checkAuthError(res) {
         if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("adminName");
             localStorage.removeItem("isp_token");
-            window.location.href = '/register.html?view=login';
+            window.location.href = 'register.html?view=login';
             return true;
         }
         return false;
+    }
+
+    // FUP Toggle & Smart Auto-Fill
+    const fupCheckbox = document.getElementById('pkgFupEnabled');
+    const fupContainer = document.getElementById('fupFieldsContainer');
+    const fupLimitInput = document.getElementById('pkgFupLimitGb');
+    const fupResetSelect = document.getElementById('pkgFupResetPolicy');
+    const fupDownloadInput = document.getElementById('pkgFupDownload');
+    const fupUploadInput = document.getElementById('pkgFupUpload');
+
+    function toggleFupFields(enabled, autoFill = false) {
+        fupContainer.style.display = enabled ? 'grid' : 'none';
+        fupLimitInput.required = enabled;
+        fupDownloadInput.required = enabled;
+        fupUploadInput.required = enabled;
+
+        if (enabled && autoFill) {
+            const normalDown = parseFloat(document.getElementById('pkgDownload').value);
+            const normalUp = parseFloat(document.getElementById('pkgUpload').value);
+            const durationMins = parseInt(document.getElementById('pkgDuration').value, 10) || 0;
+
+            if (!fupDownloadInput.value && !isNaN(normalDown) && normalDown > 0) {
+                fupDownloadInput.value = Math.max(0.5, parseFloat((normalDown * 0.5).toFixed(1)));
+            }
+            if (!fupUploadInput.value && !isNaN(normalUp) && normalUp > 0) {
+                fupUploadInput.value = Math.max(0.5, parseFloat((normalUp * 0.5).toFixed(1)));
+            }
+            if (!fupLimitInput.value) {
+                if (durationMins >= 10080) fupLimitInput.value = 5;
+                else if (durationMins >= 1440) fupLimitInput.value = 2;
+                else fupLimitInput.value = 1;
+            }
+            fupResetSelect.value = durationMins >= 1440 ? 'daily' : 'session';
+        }
+    }
+
+    if (fupCheckbox) {
+        fupCheckbox.addEventListener('change', (e) => {
+            toggleFupFields(e.target.checked, true);
+        });
     }
 
     // Package Modal Control
@@ -154,9 +213,24 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('pkgDownload').value = pkg.speed_download_kbps ? parseFloat((pkg.speed_download_kbps / 1024).toFixed(2)) : '';
             document.getElementById('pkgUpload').value = pkg.speed_upload_kbps ? parseFloat((pkg.speed_upload_kbps / 1024).toFixed(2)) : '';
             document.getElementById('pkgDevices').value = pkg.devices;
+
+            const hasFup = Boolean(pkg.fup_enabled);
+            fupCheckbox.checked = hasFup;
+            if (hasFup) {
+                fupLimitInput.value = pkg.fup_limit_mb ? parseFloat((pkg.fup_limit_mb / 1024).toFixed(2)) : '';
+                fupResetSelect.value = pkg.fup_reset_policy || 'daily';
+                if (pkg.fup_rate_limit && pkg.fup_rate_limit.includes('/')) {
+                    const [upPart, downPart] = pkg.fup_rate_limit.split('/');
+                    fupUploadInput.value = parseRatePartToMbps(upPart);
+                    fupDownloadInput.value = parseRatePartToMbps(downPart);
+                }
+            }
+            toggleFupFields(hasFup, false);
         } else {
             document.getElementById('modalTitle').textContent = 'Create a package';
             document.getElementById('pkgId').value = '';
+            fupCheckbox.checked = false;
+            toggleFupFields(false, false);
         }
         packageModal.classList.add('active');
     }
@@ -201,6 +275,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const durationString = formatDuration(p.duration_seconds);
             const serialized = encodeURIComponent(JSON.stringify(p));
 
+            let fupBadgeHtml = '';
+            if (p.fup_enabled && p.fup_limit_mb && p.fup_rate_limit) {
+                const capGb = parseFloat((p.fup_limit_mb / 1024).toFixed(1));
+                const fupSpeed = formatRateLimitDisplay(p.fup_rate_limit);
+                const policyLabel = p.fup_reset_policy === 'session' ? 'plan' : 'day';
+                fupBadgeHtml = `<div><span class="fup-pill">FUP: ${capGb}GB/${policyLabel} → ${fupSpeed}</span></div>`;
+            }
+
             return `
                 <tr>
                     <td>
@@ -209,7 +291,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td><span style="background: #E2E8F0; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; color: var(--text-muted);">${p.type}</span></td>
                     <td style="font-weight: 500;">KSh ${p.price.toLocaleString()}</td>
-                    <td style="color: var(--text-muted); font-size: 0.75rem;">${speedString}</td>
+                    <td style="color: var(--text-muted); font-size: 0.75rem;">
+                        <div>${speedString}</div>
+                        ${fupBadgeHtml}
+                    </td>
                     <td><span class="status-pill ${statusClass}"><div class="dot"></div> ${statusText}</span></td>
                     <td style="text-align: right;">
                         <button class="action-btn" onclick="editPackage('${serialized}')" title="Edit"><i data-lucide="edit-2" width="16"></i></button>
@@ -307,6 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
             saveBtn.disabled = true;
         }
 
+        const fupEnabled = fupCheckbox.checked;
         const payload = {
             id: document.getElementById('pkgId').value || null,
             name: document.getElementById('pkgName').value,
@@ -316,7 +402,12 @@ document.addEventListener("DOMContentLoaded", () => {
             speed_download_kbps: Math.round(parseFloat(document.getElementById('pkgDownload').value) * 1024),
             speed_upload_kbps: Math.round(parseFloat(document.getElementById('pkgUpload').value) * 1024),
             devices: parseInt(document.getElementById('pkgDevices').value),
-            is_active: document.getElementById('pkgStatus').value === 'true'
+            is_active: document.getElementById('pkgStatus').value === 'true',
+            fup_enabled: fupEnabled,
+            fup_limit_mb: fupEnabled ? Math.round(parseFloat(fupLimitInput.value) * 1024) : null,
+            fup_speed_download_kbps: fupEnabled ? Math.round(parseFloat(fupDownloadInput.value) * 1024) : null,
+            fup_speed_upload_kbps: fupEnabled ? Math.round(parseFloat(fupUploadInput.value) * 1024) : null,
+            fup_reset_policy: fupEnabled ? fupResetSelect.value : 'daily'
         };
 
         try {
@@ -330,7 +421,10 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (checkAuthError(res)) return;
-            if (!res.ok) throw new Error("Failed to save package");
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || "Failed to save package");
+            }
 
             closeModal();
             showToast("Package saved successfully!", "success");
@@ -338,7 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error(err);
-            showToast("Failed to save package to database.", "error");
+            showToast(err.message || "Failed to save package to database.", "error");
         } finally {
             if(saveBtn) {
                 saveBtn.textContent = "Save Package";
